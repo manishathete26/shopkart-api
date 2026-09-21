@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "shopkart-api",
+			"path": ".."
+		},
+		{
+			"name": "outputs",
+			"path": "../../Documents/Codex/2026-09-16/i-x20/outputs"
+		},
+		{
+			"name": "work",
+			"path": "../../Documents/Codex/2026-09-16/i-x20/work"
+		}
+	],
+	"settings": {}
+}
