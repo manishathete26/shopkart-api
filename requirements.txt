@@ -5,4 +5,5 @@ passlib[bcrypt]>=1.7.4
 PyJWT>=2.9.0
 python-multipart>=0.0.9
 email-validator>=2.2.0
+railway.json
 
