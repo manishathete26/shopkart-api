@@ -37,7 +37,7 @@ from .security import (
 load_dotenv()
 
 logger = logging.getLogger(__name__)
-resend.api_key = os.getenv("RESEND_API_KEY")
+# resend.api_key = os.getenv("RESEND_API_KEY")
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="ShopKart Authentication API", version="1.0.0")
@@ -56,19 +56,31 @@ async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
     email = payload.email.lower().strip()
     otp = create_otp()
 
-    if not resend.api_key or not os.getenv("RESEND_FROM_EMAIL"):
-        logger.error("Resend email configuration is missing")
+    resend_api_key = os.getenv("RESEND_API_KEY")
+    from_email = os.getenv("RESEND_FROM_EMAIL")
+
+    logger.info(
+        "Resend configured: api_key=%s, from_email=%s",
+        bool(resend_api_key),
+        bool(from_email),
+    )
+
+    if not resend_api_key or not from_email:
         raise HTTPException(
             status_code=500,
             detail="Email service is not configured.",
         )
 
+    resend.api_key = resend_api_key
+
+    # आधीचे unused OTP invalidate करा
     db.execute(
         update(OTPCode)
         .where(OTPCode.email == email, OTPCode.is_used.is_(False))
         .values(is_used=True)
     )
 
+    # नवीन OTP database मध्ये save करा
     otp_record = OTPCode(
         email=email,
         code_hash=hash_otp(email, otp),
@@ -79,7 +91,7 @@ async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
 
     try:
         await resend.Emails.send_async({
-            "from": os.getenv("RESEND_FROM_EMAIL"),
+            "from": from_email,
             "to": [email],
             "subject": "ShopKart Verification OTP",
             "html": f"""
@@ -91,8 +103,11 @@ async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
         })
     except Exception:
         logger.exception("OTP email send failed for %s", email)
+
+        # Email send fail झाल्यास OTP invalid करा
         otp_record.is_used = True
         db.commit()
+
         raise HTTPException(
             status_code=500,
             detail="OTP email could not be sent. Please try again.",
