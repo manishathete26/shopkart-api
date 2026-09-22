@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import timedelta
 
@@ -35,6 +36,7 @@ mail_config = ConnectionConfig(
     MAIL_SSL_TLS=False,
     USE_CREDENTIALS=True,
 )
+logger = logging.getLogger(__name__)
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="ShopKart Authentication API", version="1.0.0")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/verify-otp")
@@ -80,17 +82,14 @@ async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
     try:
         await FastMail(mail_config).send_message(message)
     except Exception:
-        
-        otp_record.is_used = True
-        db.commit()
-        raise HTTPException(
-            status_code=500,
-            detail="OTP email could not be sent. Please try again.",
-        )
+     logger.exception("OTP email send failed for %s", email)
 
-    return SendOTPResponse(
-        message="OTP sent successfully to your email",
-        expires_in_seconds=OTP_EXPIRE_MINUTES * 60,
+    otp_record.is_used = True
+    db.commit()
+
+    raise HTTPException(
+        status_code=500,
+        detail="OTP email could not be sent. Please try again.",
     )
 
 
