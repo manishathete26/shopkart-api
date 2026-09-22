@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from .database import Base, engine, get_db
 from .models import OTPCode, RefreshSession, User
+from dotenv import load_dotenv
+from fastapi_mail import ConnectionConfig, FastMail, MessageSchema
 from .schemas import (
     CreateProfileRequest,
     EmailRequest,
@@ -21,7 +23,18 @@ from .schemas import (
     VerifyOTPRequest,
 )
 from .security import ALGORITHM, OTP_EXPIRE_MINUTES, SECRET_KEY, create_access_token, create_otp, create_refresh_token, hash_otp, utc_now
+load_dotenv()
 
+mail_config = ConnectionConfig(
+    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+    MAIL_FROM=os.getenv("MAIL_FROM"),
+    MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
+    MAIL_SERVER=os.getenv("MAIL_SERVER"),
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
+    USE_CREDENTIALS=True,
+)
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="ShopKart Authentication API", version="1.0.0")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/verify-otp")
@@ -35,7 +48,7 @@ def token_pair_for(user: User, db: Session) -> TokenPair:
 
 
 @app.post("/auth/send-otp", response_model=SendOTPResponse)
-def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
+async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
     email = payload.email.lower().strip()
     otp = create_otp()
 
@@ -45,21 +58,39 @@ def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
         .values(is_used=True)
     )
 
-    db.add(
-        OTPCode(
-            email=email,
-            code_hash=hash_otp(email, otp),
-            expires_at=utc_now() + timedelta(minutes=OTP_EXPIRE_MINUTES),
-        )
+    otp_record = OTPCode(
+        email=email,
+        code_hash=hash_otp(email, otp),
+        expires_at=utc_now() + timedelta(minutes=OTP_EXPIRE_MINUTES),
     )
+    db.add(otp_record)
     db.commit()
 
-    is_development = os.getenv("ENVIRONMENT", "development") != "production"
+    message = MessageSchema(
+        subject="ShopKart Verification OTP",
+        recipients=[email],
+        body=(
+            f"Your ShopKart verification OTP is: {otp}\n\n"
+            f"This OTP expires in {OTP_EXPIRE_MINUTES} minutes.\n"
+            "Do not share this code with anyone."
+        ),
+        subtype="plain",
+    )
+
+    try:
+        await FastMail(mail_config).send_message(message)
+    except Exception:
+        
+        otp_record.is_used = True
+        db.commit()
+        raise HTTPException(
+            status_code=500,
+            detail="OTP email could not be sent. Please try again.",
+        )
 
     return SendOTPResponse(
-        message="OTP generated successfully",
+        message="OTP sent successfully to your email",
         expires_in_seconds=OTP_EXPIRE_MINUTES * 60,
-        development_otp=otp if is_development else None,
     )
 
 

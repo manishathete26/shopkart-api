@@ -8,7 +8,6 @@ class EmailRequest(BaseModel):
 class SendOTPResponse(BaseModel):
     message: str
     expires_in_seconds: int
-    development_otp: str | None = None
 
 class VerifyOTPRequest(EmailRequest):
     otp: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
