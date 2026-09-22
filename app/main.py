@@ -1,18 +1,18 @@
 import logging
 import os
 from datetime import timedelta
-
 import jwt
+import resend
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
+from pydantic import BaseModel, EmailStr
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, EmailStr
+
 from .database import Base, engine, get_db
 from .models import OTPCode, RefreshSession, User
-from dotenv import load_dotenv
-from fastapi_mail import ConnectionConfig, FastMail, MessageSchema
 from .schemas import (
     CreateProfileRequest,
     EmailRequest,
@@ -23,20 +23,22 @@ from .schemas import (
     UserRead,
     VerifyOTPRequest,
 )
-from .security import ALGORITHM, OTP_EXPIRE_MINUTES, SECRET_KEY, create_access_token, create_otp, create_refresh_token, hash_otp, utc_now
+from .security import (
+    ALGORITHM,
+    OTP_EXPIRE_MINUTES,
+    SECRET_KEY,
+    create_access_token,
+    create_otp,
+    create_refresh_token,
+    hash_otp,
+    utc_now,
+)
+
 load_dotenv()
 
-mail_config = ConnectionConfig(
-    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
-    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
-    MAIL_FROM=os.getenv("MAIL_FROM"),
-    MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
-    MAIL_SERVER=os.getenv("MAIL_SERVER"),
-    MAIL_STARTTLS=True,
-    MAIL_SSL_TLS=False,
-    USE_CREDENTIALS=True,
-)
 logger = logging.getLogger(__name__)
+resend.api_key = os.getenv("RESEND_API_KEY")
+
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="ShopKart Authentication API", version="1.0.0")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/verify-otp")
@@ -54,6 +56,13 @@ async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
     email = payload.email.lower().strip()
     otp = create_otp()
 
+    if not resend.api_key or not os.getenv("RESEND_FROM_EMAIL"):
+        logger.error("Resend email configuration is missing")
+        raise HTTPException(
+            status_code=500,
+            detail="Email service is not configured.",
+        )
+
     db.execute(
         update(OTPCode)
         .where(OTPCode.email == email, OTPCode.is_used.is_(False))
@@ -68,28 +77,30 @@ async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
     db.add(otp_record)
     db.commit()
 
-    message = MessageSchema(
-        subject="ShopKart Verification OTP",
-        recipients=[email],
-        body=(
-            f"Your ShopKart verification OTP is: {otp}\n\n"
-            f"This OTP expires in {OTP_EXPIRE_MINUTES} minutes.\n"
-            "Do not share this code with anyone."
-        ),
-        subtype="plain",
-    )
-
     try:
-        await FastMail(mail_config).send_message(message)
+        await resend.Emails.send_async({
+            "from": os.getenv("RESEND_FROM_EMAIL"),
+            "to": [email],
+            "subject": "ShopKart Verification OTP",
+            "html": f"""
+                <p>Your ShopKart verification OTP is:</p>
+                <h2>{otp}</h2>
+                <p>This OTP expires in {OTP_EXPIRE_MINUTES} minutes.</p>
+                <p>Do not share this OTP with anyone.</p>
+            """,
+        })
     except Exception:
-     logger.exception("OTP email send failed for %s", email)
+        logger.exception("OTP email send failed for %s", email)
+        otp_record.is_used = True
+        db.commit()
+        raise HTTPException(
+            status_code=500,
+            detail="OTP email could not be sent. Please try again.",
+        )
 
-    otp_record.is_used = True
-    db.commit()
-
-    raise HTTPException(
-        status_code=500,
-        detail="OTP email could not be sent. Please try again.",
+    return SendOTPResponse(
+        message="OTP sent successfully to your email",
+        expires_in_seconds=OTP_EXPIRE_MINUTES * 60,
     )
 
 
