@@ -42,22 +42,32 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="ShopKart Authentication API", version="1.0.0")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/verify-otp")
 
-
 def get_mail_config() -> ConnectionConfig:
     """Build Gmail SMTP configuration from environment variables."""
     username = os.getenv("MAIL_USERNAME")
     password = os.getenv("MAIL_PASSWORD")
-    from_email = os.getenv("MAIL_FROM")
-    server = os.getenv("MAIL_SERVER")
-    port = os.getenv("MAIL_PORT")
+    from_email = os.getenv("MAIL_FROM") or username
+    server = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    port_value = os.getenv("MAIL_PORT", "587")
+    use_ssl = os.getenv("MAIL_SSL_TLS", "false").lower() == "true"
+    use_starttls = os.getenv("MAIL_STARTTLS", "true").lower() == "true"
 
-    if not all((username, password, from_email, server, port)):
-        raise HTTPException(status_code=500, detail="Email service is not configured.")
+    if not all((username, password, from_email, server, port_value)):
+        raise HTTPException(
+            status_code=500,
+            detail="Email service is not configured.",
+        )
 
     try:
-        mail_port = int(port)
+        mail_port = int(port_value)
     except ValueError as error:
-        raise HTTPException(status_code=500, detail="Email service is not configured.") from error
+        raise HTTPException(
+            status_code=500,
+            detail="Email service is not configured.",
+        ) from error
+
+    use_ssl = os.getenv("MAIL_SSL_TLS", "true").lower() == "true"
+    use_starttls = os.getenv("MAIL_STARTTLS", "false").lower() == "true"
 
     return ConnectionConfig(
         MAIL_USERNAME=username,
@@ -65,28 +75,31 @@ def get_mail_config() -> ConnectionConfig:
         MAIL_FROM=from_email,
         MAIL_PORT=mail_port,
         MAIL_SERVER=server,
-        MAIL_STARTTLS=os.getenv("MAIL_STARTTLS", "true").lower() == "true",
-        MAIL_SSL_TLS=os.getenv("MAIL_SSL_TLS", "false").lower() == "true",
+        MAIL_STARTTLS=use_starttls,
+        MAIL_SSL_TLS=use_ssl,
         USE_CREDENTIALS=True,
         VALIDATE_CERTS=True,
     )
 
 
-def token_pair_for(user: User, db: Session) -> TokenPair:
-    refresh_token, token_id, expires_at = create_refresh_token(user.id)
-    db.add(RefreshSession(user_id=user.id, token_id=token_id, expires_at=expires_at))
-    db.commit()
-    return TokenPair(access_token=create_access_token(user.id), refresh_token=refresh_token, profile_completed=user.profile_completed)
-
-
 @app.post("/auth/send-otp", response_model=SendOTPResponse)
-async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
-    email = payload.email.lower().strip()
-    otp = create_otp()
+async def send_otp(
+    payload: EmailRequest,
+    db: Session = Depends(get_db),
+):
+    email = str(payload.email).strip().lower()
+
+    # Email config चुकली असल्यास आधीच कळेल; OTP record तयार होणार नाही.
     mail_config = get_mail_config()
+    otp = create_otp()
+
+    # आधीचे न वापरलेले OTP invalid करा.
     db.execute(
         update(OTPCode)
-        .where(OTPCode.email == email, OTPCode.is_used.is_(False))
+        .where(
+            OTPCode.email == email,
+            OTPCode.is_used.is_(False),
+        )
         .values(is_used=True)
     )
 
@@ -97,31 +110,33 @@ async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
     )
     db.add(otp_record)
     db.commit()
+    db.refresh(otp_record)
+
+    message = MessageSchema(
+        recipients=[email],
+        subject="ShopKart Verification OTP",
+        body=(
+            "<p>Your ShopKart verification OTP is:</p>"
+            f"<h2>{otp}</h2>"
+            f"<p>This OTP expires in {OTP_EXPIRE_MINUTES} minutes.</p>"
+            "<p>Do not share this OTP with anyone.</p>"
+        ),
+        subtype=MessageType.html,
+    )
 
     try:
-        message = MessageSchema(
-            recipients=[email],
-            subject="ShopKart Verification OTP",
-            body=f"""
-                <p>Your ShopKart verification OTP is:</p>
-                <h2>{otp}</h2>
-                <p>This OTP expires in {OTP_EXPIRE_MINUTES} minutes.</p>
-                <p>Do not share this OTP with anyone.</p>
-            """,
-            subtype=MessageType.html,
-        )
         await FastMail(mail_config).send_message(message)
-    except Exception:
+    except Exception as error:
         logger.exception("OTP email send failed for %s", email)
 
-        # Email send fail झाल्यास OTP invalid करा
+        # Email गेला नाही, म्हणून हा OTP वापरता येऊ नये.
         otp_record.is_used = True
         db.commit()
 
         raise HTTPException(
-            status_code=500,
+            status_code=502,
             detail="OTP email could not be sent. Please try again.",
-        )
+        ) from error
 
     return SendOTPResponse(
         message="OTP sent successfully to your email",
