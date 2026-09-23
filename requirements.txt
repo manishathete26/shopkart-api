@@ -7,4 +7,3 @@ python-multipart>=0.0.9
 email-validator>=2.2.0
 fastapi-mail
 python-dotenv
-resend[async]

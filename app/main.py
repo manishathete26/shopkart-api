@@ -2,9 +2,9 @@ import logging
 import os
 from datetime import timedelta
 import jwt
-import resend
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 from pydantic import BaseModel, EmailStr
@@ -37,11 +37,39 @@ from .security import (
 load_dotenv()
 
 logger = logging.getLogger(__name__)
-# resend.api_key = os.getenv("RESEND_API_KEY")
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="ShopKart Authentication API", version="1.0.0")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/verify-otp")
+
+
+def get_mail_config() -> ConnectionConfig:
+    """Build Gmail SMTP configuration from environment variables."""
+    username = os.getenv("MAIL_USERNAME")
+    password = os.getenv("MAIL_PASSWORD")
+    from_email = os.getenv("MAIL_FROM")
+    server = os.getenv("MAIL_SERVER")
+    port = os.getenv("MAIL_PORT")
+
+    if not all((username, password, from_email, server, port)):
+        raise HTTPException(status_code=500, detail="Email service is not configured.")
+
+    try:
+        mail_port = int(port)
+    except ValueError as error:
+        raise HTTPException(status_code=500, detail="Email service is not configured.") from error
+
+    return ConnectionConfig(
+        MAIL_USERNAME=username,
+        MAIL_PASSWORD=password,
+        MAIL_FROM=from_email,
+        MAIL_PORT=mail_port,
+        MAIL_SERVER=server,
+        MAIL_STARTTLS=os.getenv("MAIL_STARTTLS", "true").lower() == "true",
+        MAIL_SSL_TLS=os.getenv("MAIL_SSL_TLS", "false").lower() == "true",
+        USE_CREDENTIALS=True,
+        VALIDATE_CERTS=True,
+    )
 
 
 def token_pair_for(user: User, db: Session) -> TokenPair:
@@ -55,32 +83,13 @@ def token_pair_for(user: User, db: Session) -> TokenPair:
 async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
     email = payload.email.lower().strip()
     otp = create_otp()
-
-    resend_api_key = os.getenv("RESEND_API_KEY")
-    from_email = os.getenv("RESEND_FROM_EMAIL")
-
-    logger.info(
-        "Resend configured: api_key=%s, from_email=%s",
-        bool(resend_api_key),
-        bool(from_email),
-    )
-
-    if not resend_api_key or not from_email:
-        raise HTTPException(
-            status_code=500,
-            detail="Email service is not configured.",
-        )
-
-    resend.api_key = resend_api_key
-
-    # आधीचे unused OTP invalidate करा
+    mail_config = get_mail_config()
     db.execute(
         update(OTPCode)
         .where(OTPCode.email == email, OTPCode.is_used.is_(False))
         .values(is_used=True)
     )
 
-    # नवीन OTP database मध्ये save करा
     otp_record = OTPCode(
         email=email,
         code_hash=hash_otp(email, otp),
@@ -90,17 +99,18 @@ async def send_otp(payload: EmailRequest, db: Session = Depends(get_db)):
     db.commit()
 
     try:
-        await resend.Emails.send_async({
-            "from": from_email,
-            "to": [email],
-            "subject": "ShopKart Verification OTP",
-            "html": f"""
+        message = MessageSchema(
+            recipients=[email],
+            subject="ShopKart Verification OTP",
+            body=f"""
                 <p>Your ShopKart verification OTP is:</p>
                 <h2>{otp}</h2>
                 <p>This OTP expires in {OTP_EXPIRE_MINUTES} minutes.</p>
                 <p>Do not share this OTP with anyone.</p>
             """,
-        })
+            subtype=MessageType.html,
+        )
+        await FastMail(mail_config).send_message(message)
     except Exception:
         logger.exception("OTP email send failed for %s", email)
 
