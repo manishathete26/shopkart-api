@@ -1,6 +1,5 @@
 import logging
-from datetime import timedelta
-
+from datetime import timedelta, timezone
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_mail import FastMail, MessageSchema, MessageType
@@ -45,11 +44,9 @@ async def send_otp(
 ):
     email = str(payload.email).strip().lower()
 
-    # Email config चुकली असल्यास आधीच कळेल; OTP record तयार होणार नाही.
     mail_config = get_mail_config()
     otp = create_otp()
 
-    # आधीचे न वापरलेले OTP invalid करा.
     db.execute(
         update(OTPCode)
         .where(
@@ -85,7 +82,6 @@ async def send_otp(
     except Exception as error:
         logger.exception("OTP email send failed for %s", email)
 
-        # Email गेला नाही, म्हणून हा OTP वापरता येऊ नये.
         otp_record.is_used = True
         db.commit()
 
@@ -106,20 +102,43 @@ def verify_otp(payload: VerifyOTPRequest, db: Session = Depends(get_db)):
 
     otp_record = db.scalar(
         select(OTPCode)
-        .where(OTPCode.email == email, OTPCode.is_used.is_(False))
+        .where(
+            OTPCode.email == email,
+            OTPCode.is_used.is_(False),
+        )
         .order_by(OTPCode.id.desc())
     )
 
-    if not otp_record or otp_record.expires_at < utc_now():
-        raise HTTPException(status_code=400, detail="OTP is invalid or expired")
+    if not otp_record:
+        raise HTTPException(
+            status_code=400,
+            detail="OTP is invalid or expired",
+        )
+
+    # SQLite may return this datetime without timezone information.
+    expires_at = otp_record.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    if expires_at <= utc_now():
+        raise HTTPException(
+            status_code=400,
+            detail="OTP is invalid or expired",
+        )
 
     if otp_record.attempts >= 5:
-        raise HTTPException(status_code=429, detail="Too many OTP attempts")
+        raise HTTPException(
+            status_code=429,
+            detail="Too many OTP attempts",
+        )
 
     if otp_record.code_hash != hash_otp(email, payload.otp):
         otp_record.attempts += 1
         db.commit()
-        raise HTTPException(status_code=400, detail="Invalid OTP")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid OTP",
+        )
 
     otp_record.is_used = True
 
@@ -151,22 +170,59 @@ def create_profile(
 
 
 @router.post("/refresh", response_model=TokenPair)
-def refresh_token(payload: RefreshTokenRequest, db: Session = Depends(get_db)):
+def refresh_token(
+    payload: RefreshTokenRequest,
+    db: Session = Depends(get_db),
+):
     try:
-        claims = jwt.decode(payload.refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        claims = jwt.decode(
+            payload.refresh_token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM],
+        )
         if claims.get("type") != "refresh":
             raise InvalidTokenError
-        user_id, token_id = int(claims["sub"]), claims["jti"]
+
+        user_id = int(claims["sub"])
+        token_id = claims["jti"]
+
     except (InvalidTokenError, KeyError, ValueError):
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
-    session = db.scalar(select(RefreshSession).where(RefreshSession.token_id == token_id))
-    if not session or session.is_revoked or session.expires_at < utc_now():
-        raise HTTPException(status_code=401, detail="Refresh token is expired or revoked")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid refresh token",
+        )
+
+    session = db.scalar(
+        select(RefreshSession).where(RefreshSession.token_id == token_id)
+    )
+
+    if not session or session.is_revoked:
+        raise HTTPException(
+            status_code=401,
+            detail="Refresh token is expired or revoked",
+        )
+
+    expires_at = session.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    if expires_at <= utc_now():
+        raise HTTPException(
+            status_code=401,
+            detail="Refresh token is expired or revoked",
+        )
+
+    # These lines are outside the expiry check.
     user = db.get(User, user_id)
     if not user or not user.is_active:
-        raise HTTPException(status_code=401, detail="User is unavailable")
+        raise HTTPException(
+            status_code=401,
+            detail="User is unavailable",
+        )
+
     session.is_revoked = True
     db.commit()
+
     return token_pair_for(user, db)
 
 
@@ -188,3 +244,21 @@ def logout(payload: LogoutRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserRead)
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
+
+def token_pair_for(user: User, db: Session) -> TokenPair:
+    refresh_token, token_id, expires_at = create_refresh_token(user.id)
+
+    db.add(
+        RefreshSession(
+            user_id=user.id,
+            token_id=token_id,
+            expires_at=expires_at,
+        )
+    )
+    db.commit()
+
+    return TokenPair(
+        access_token=create_access_token(user.id),
+        refresh_token=refresh_token,
+        profile_completed=user.profile_completed,
+    )
