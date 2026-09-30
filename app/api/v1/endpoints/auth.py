@@ -1,10 +1,13 @@
 import logging
 from datetime import timedelta, timezone
+
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_mail import FastMail, MessageSchema, MessageType
 from jwt import InvalidTokenError
+from passlib.context import CryptContext
 from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ....core.security import (
@@ -22,8 +25,10 @@ from ....models.auth import OTPCode, RefreshSession, User
 from ....schemas.auth import (
     CreateProfileRequest,
     EmailRequest,
+    LoginRequest,
     LogoutRequest,
     RefreshTokenRequest,
+    RegisterRequest,
     SendOTPResponse,
     TokenPair,
     UserRead,
@@ -33,8 +38,68 @@ from ....services.email import get_mail_config
 from ...deps import get_current_user
 
 router = APIRouter(prefix="/auth")
-
 logger = logging.getLogger(__name__)
+
+# Password auth is independent of the OTP endpoints below.
+password_context = CryptContext(
+    schemes=["pbkdf2_sha256"],
+    deprecated="auto",
+    pbkdf2_sha256__rounds=600_000,
+)
+
+
+@router.post("/register", response_model=TokenPair, status_code=status.HTTP_201_CREATED)
+def register(payload: RegisterRequest, db: Session = Depends(get_db)):
+    email = str(payload.email).strip().lower()
+    existing_user = db.scalar(select(User).where(User.email == email))
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An account with this email already exists",
+        )
+
+    user = User(
+        email=email,
+        full_name=payload.full_name.strip(),
+        password_hash=password_context.hash(payload.password),
+        gender=payload.gender.strip().lower(),
+        address=payload.address.strip(),
+        pin=payload.pin.strip(),
+        profile_completed=True,
+    )
+    db.add(user)
+    try:
+        db.commit()
+    except IntegrityError as error:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An account with this email already exists",
+        ) from error
+
+    db.refresh(user)
+    return token_pair_for(user, db)
+
+
+@router.post("/login", response_model=TokenPair)
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
+    email = str(payload.email).strip().lower()
+    user = db.scalar(select(User).where(User.email == email))
+
+    # Keep the response generic so it doesn't reveal which emails are registered.
+    if (
+        not user
+        or not user.password_hash
+        or not password_context.verify(payload.password, user.password_hash)
+        or not user.is_active
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return token_pair_for(user, db)
 
 
 @router.post("/send-otp", response_model=SendOTPResponse)
@@ -110,10 +175,7 @@ def verify_otp(payload: VerifyOTPRequest, db: Session = Depends(get_db)):
     )
 
     if not otp_record:
-        raise HTTPException(
-            status_code=400,
-            detail="OTP is invalid or expired",
-        )
+        raise HTTPException(status_code=400, detail="OTP is invalid or expired")
 
     # SQLite may return this datetime without timezone information.
     expires_at = otp_record.expires_at
@@ -121,24 +183,15 @@ def verify_otp(payload: VerifyOTPRequest, db: Session = Depends(get_db)):
         expires_at = expires_at.replace(tzinfo=timezone.utc)
 
     if expires_at <= utc_now():
-        raise HTTPException(
-            status_code=400,
-            detail="OTP is invalid or expired",
-        )
+        raise HTTPException(status_code=400, detail="OTP is invalid or expired")
 
     if otp_record.attempts >= 5:
-        raise HTTPException(
-            status_code=429,
-            detail="Too many OTP attempts",
-        )
+        raise HTTPException(status_code=429, detail="Too many OTP attempts")
 
     if otp_record.code_hash != hash_otp(email, payload.otp):
         otp_record.attempts += 1
         db.commit()
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid OTP",
-        )
+        raise HTTPException(status_code=400, detail="Invalid OTP")
 
     otp_record.is_used = True
 
@@ -187,10 +240,7 @@ def refresh_token(
         token_id = claims["jti"]
 
     except (InvalidTokenError, KeyError, ValueError):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid refresh token",
-        )
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     session = db.scalar(
         select(RefreshSession).where(RefreshSession.token_id == token_id)
@@ -212,13 +262,9 @@ def refresh_token(
             detail="Refresh token is expired or revoked",
         )
 
-    # These lines are outside the expiry check.
     user = db.get(User, user_id)
     if not user or not user.is_active:
-        raise HTTPException(
-            status_code=401,
-            detail="User is unavailable",
-        )
+        raise HTTPException(status_code=401, detail="User is unavailable")
 
     session.is_revoked = True
     db.commit()
@@ -229,13 +275,20 @@ def refresh_token(
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(payload: LogoutRequest, db: Session = Depends(get_db)):
     try:
-        claims = jwt.decode(payload.refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        claims = jwt.decode(
+            payload.refresh_token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM],
+        )
         if claims.get("type") != "refresh":
             raise InvalidTokenError
         token_id = claims["jti"]
     except (InvalidTokenError, KeyError):
         raise HTTPException(status_code=400, detail="Invalid refresh token")
-    session = db.scalar(select(RefreshSession).where(RefreshSession.token_id == token_id))
+
+    session = db.scalar(
+        select(RefreshSession).where(RefreshSession.token_id == token_id)
+    )
     if session:
         session.is_revoked = True
         db.commit()
@@ -244,6 +297,7 @@ def logout(payload: LogoutRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserRead)
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
+
 
 def token_pair_for(user: User, db: Session) -> TokenPair:
     refresh_token, token_id, expires_at = create_refresh_token(user.id)
