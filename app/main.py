@@ -78,7 +78,8 @@ app.add_middleware(
         "http://localhost:8081",
         "http://127.0.0.1:8081",
     ],
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 app.include_router(api_router)
