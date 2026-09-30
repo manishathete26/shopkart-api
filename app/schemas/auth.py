@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field
 
 
 class EmailRequest(BaseModel):
@@ -9,18 +9,11 @@ class RegisterRequest(BaseModel):
     full_name: str = Field(alias="fullName", min_length=2, max_length=120)
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
-    confirm_password: str = Field(alias="confirmPassword", min_length=8, max_length=128)
-    gender: str = Field(min_length=1, max_length=20)
+    gender: int = Field(ge=0, le=2, description="0=male, 1=female, 2=others")
     address: str = Field(min_length=5, max_length=500)
     pin: str = Field(pattern=r"^\d{6}$")
 
     model_config = {"populate_by_name": True}
-
-    @model_validator(mode="after")
-    def passwords_must_match(self):
-        if self.password != self.confirm_password:
-            raise ValueError("password and confirmPassword must match")
-        return self
 
 
 class LoginRequest(BaseModel):
@@ -40,14 +33,14 @@ class VerifyOTPRequest(EmailRequest):
 class CreateProfileRequest(BaseModel):
     full_name: str = Field(min_length=2, max_length=120)
     email: EmailStr | None = None
-    gender: str | None = Field(default=None, pattern="^(male|female|other)$")
+    gender: int | None = Field(default=None, ge=0, le=2, description="0=male, 1=female, 2=others")
 
 
 class UserRead(BaseModel):
     id: int
     full_name: str | None
     email: EmailStr | None
-    gender: str | None
+    gender: int | None
     profile_completed: bool
     model_config = {"from_attributes": True}
 
