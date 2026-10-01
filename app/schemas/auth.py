@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class EmailRequest(BaseModel):
@@ -9,9 +9,21 @@ class RegisterRequest(BaseModel):
     full_name: str = Field(alias="fullName", min_length=2, max_length=120)
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
-    gender: int = Field(ge=0, le=2, description="0=male, 1=female, 2=others")
+    gender: int | None = Field(
+        default=None,
+        ge=0,
+        le=2,
+        description="0=male, 1=female, 2=others",
+    )
     address: str = Field(min_length=5, max_length=500)
     pin: str = Field(pattern=r"^\d{6}$")
+
+    @field_validator("gender", mode="before")
+    @classmethod
+    def empty_gender_to_none(cls, value):
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
 
     model_config = {"populate_by_name": True}
 
