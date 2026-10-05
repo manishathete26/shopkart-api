@@ -8,7 +8,6 @@ from ...deps import get_current_user
 router = APIRouter(
     prefix="/products",
     tags=["products"],
-    dependencies=[Depends(get_current_user)],
 )
 
 _catalog_path = Path(__file__).resolve().parents[3] / "data" / "products.json"
@@ -31,7 +30,7 @@ def list_products(
     return {"count": len(result), "products": result}
 
 
-@router.get("/{product_id}")
+@router.get("/{product_id}", dependencies=[Depends(get_current_user)])
 def get_product(product_id: int) -> dict:
     """Return one product by its numeric ID."""
     for product in _products:
