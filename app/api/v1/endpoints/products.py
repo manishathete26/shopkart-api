@@ -1,6 +1,12 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
-router = APIRouter(prefix="/products", tags=["products"])
+from ...deps import get_current_user
+
+router = APIRouter(
+    prefix="/products",
+    tags=["products"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 def create_variant_with_options(
