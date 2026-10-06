@@ -1,55 +1,1856 @@
 {
-  "count": 50,
   "products": [
-    {"id":1,"name":"Samsung Galaxy A55","description":"Samsung smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Samsung","rating":4.2,"reviews":120,"offers":[],"variants":[{"id":"1-awesome-iceblue-128-gb","productId":1,"slug":"awesome-iceblue-128-gb","options":[{"type":"color","label":"Color","value":"Awesome Iceblue"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":39999,"originalPrice":42999,"stock":10,"imageBackground":"#9ec8d8","imageQuery":"Samsung+Galaxy+A55"}]},
-    {"id":2,"name":"Samsung Galaxy S24","description":"Premium Samsung smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Samsung","rating":1.7,"reviews":11,"offers":["Bank Offer Flat ₹1,500 off on select cards"],"variants":[{"id":"2-onyx-black-128-gb","productId":2,"slug":"onyx-black-128-gb","options":[{"type":"color","label":"Color","value":"Onyx Black"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":74999,"originalPrice":81999,"stock":12,"imageBackground":"#111111","imageQuery":"Galaxy+S24"}]},
-    {"id":3,"name":"Samsung Galaxy S24+","description":"Premium Samsung smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Samsung","rating":4.4,"reviews":85,"offers":[],"variants":[{"id":"3-cobalt-violet-256-gb","productId":3,"slug":"cobalt-violet-256-gb","options":[{"type":"color","label":"Color","value":"Cobalt Violet"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":99999,"originalPrice":109999,"stock":8,"imageBackground":"#b39ddb","imageQuery":"Galaxy+S24+Plus"}]},
-    {"id":4,"name":"Samsung Galaxy S24 Ultra","description":"Premium Samsung smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Samsung","rating":4.6,"reviews":140,"offers":[],"variants":[{"id":"4-titanium-gray-256-gb","productId":4,"slug":"titanium-gray-256-gb","options":[{"type":"color","label":"Color","value":"Titanium Gray"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":129999,"originalPrice":139999,"stock":6,"imageBackground":"#9e9e9e","imageQuery":"Galaxy+S24+Ultra"}]},
-    {"id":5,"name":"Samsung Galaxy Z Flip6","description":"Foldable Samsung smartphone.","category":"Mobiles","subCategory":"Foldable Smartphones","brand":"Samsung","rating":4.3,"reviews":60,"offers":[],"variants":[{"id":"5-silver-shadow-256-gb","productId":5,"slug":"silver-shadow-256-gb","options":[{"type":"color","label":"Color","value":"Silver Shadow"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":109999,"originalPrice":119999,"stock":5,"imageBackground":"#bdbdbd","imageQuery":"Galaxy+Z+Flip6"}]},
-    {"id":6,"name":"Samsung Galaxy Z Fold6","description":"Foldable Samsung smartphone.","category":"Mobiles","subCategory":"Foldable Smartphones","brand":"Samsung","rating":4.5,"reviews":45,"offers":[],"variants":[{"id":"6-navy-256-gb","productId":6,"slug":"navy-256-gb","options":[{"type":"color","label":"Color","value":"Navy"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":164999,"originalPrice":174999,"stock":4,"imageBackground":"#263b68","imageQuery":"Galaxy+Z+Fold6"}]},
-    {"id":7,"name":"Samsung Galaxy A35","description":"Samsung smartphone for everyday use.","category":"Mobiles","subCategory":"Smartphones","brand":"Samsung","rating":4.0,"reviews":95,"offers":[],"variants":[{"id":"7-awesome-navy-128-gb","productId":7,"slug":"awesome-navy-128-gb","options":[{"type":"color","label":"Color","value":"Awesome Navy"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":30999,"originalPrice":33999,"stock":14,"imageBackground":"#273b5a","imageQuery":"Samsung+Galaxy+A35"}]},
-    {"id":8,"name":"Samsung Galaxy M55","description":"Samsung smartphone with a large display.","category":"Mobiles","subCategory":"Smartphones","brand":"Samsung","rating":4.1,"reviews":72,"offers":[],"variants":[{"id":"8-light-green-128-gb","productId":8,"slug":"light-green-128-gb","options":[{"type":"color","label":"Color","value":"Light Green"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":26999,"originalPrice":29999,"stock":9,"imageBackground":"#a5c9a5","imageQuery":"Samsung+Galaxy+M55"}]},
-    {"id":9,"name":"Samsung Galaxy M35","description":"Samsung smartphone for everyday entertainment.","category":"Mobiles","subCategory":"Smartphones","brand":"Samsung","rating":4.0,"reviews":50,"offers":[],"variants":[{"id":"9-dark-blue-128-gb","productId":9,"slug":"dark-blue-128-gb","options":[{"type":"color","label":"Color","value":"Dark Blue"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":19999,"originalPrice":22999,"stock":16,"imageBackground":"#263c66","imageQuery":"Samsung+Galaxy+M35"}]},
-    {"id":10,"name":"Samsung Galaxy S23 FE","description":"Samsung smartphone with premium features.","category":"Mobiles","subCategory":"Smartphones","brand":"Samsung","rating":4.2,"reviews":110,"offers":[],"variants":[{"id":"10-graphite-128-gb","productId":10,"slug":"graphite-128-gb","options":[{"type":"color","label":"Color","value":"Graphite"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":49999,"originalPrice":54999,"stock":7,"imageBackground":"#424242","imageQuery":"Samsung+Galaxy+S23+FE"}]},
-    {"id":11,"name":"Vivo X100","description":"Vivo smartphone with premium camera features.","category":"Mobiles","subCategory":"Smartphones","brand":"Vivo","rating":4.5,"reviews":90,"offers":[],"variants":[{"id":"11-startrail-blue-256-gb","productId":11,"slug":"startrail-blue-256-gb","options":[{"type":"color","label":"Color","value":"Startrail Blue"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":63999,"originalPrice":69999,"stock":7,"imageBackground":"#466b9b","imageQuery":"Vivo+X100"}]},
-    {"id":12,"name":"Vivo V30 Pro","description":"Vivo smartphone with portrait camera features.","category":"Mobiles","subCategory":"Smartphones","brand":"Vivo","rating":4.3,"reviews":76,"offers":[],"variants":[{"id":"12-andaman-blue-256-gb","productId":12,"slug":"andaman-blue-256-gb","options":[{"type":"color","label":"Color","value":"Andaman Blue"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":41999,"originalPrice":46999,"stock":8,"imageBackground":"#6d9bc2","imageQuery":"Vivo+V30+Pro"}]},
-    {"id":13,"name":"Vivo V30","description":"Vivo smartphone with a slim design.","category":"Mobiles","subCategory":"Smartphones","brand":"Vivo","rating":4.2,"reviews":65,"offers":[],"variants":[{"id":"13-peacock-green-128-gb","productId":13,"slug":"peacock-green-128-gb","options":[{"type":"color","label":"Color","value":"Peacock Green"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":33999,"originalPrice":37999,"stock":10,"imageBackground":"#3d887a","imageQuery":"Vivo+V30"}]},
-    {"id":14,"name":"Vivo T3 Ultra","description":"Vivo performance smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Vivo","rating":4.2,"reviews":58,"offers":[],"variants":[{"id":"14-frost-green-128-gb","productId":14,"slug":"frost-green-128-gb","options":[{"type":"color","label":"Color","value":"Frost Green"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":31999,"originalPrice":35999,"stock":9,"imageBackground":"#a4cbb7","imageQuery":"Vivo+T3+Ultra"}]},
-    {"id":15,"name":"Vivo T3 Pro","description":"Vivo smartphone for performance and entertainment.","category":"Mobiles","subCategory":"Smartphones","brand":"Vivo","rating":4.1,"reviews":49,"offers":[],"variants":[{"id":"15-sandstone-orange-128-gb","productId":15,"slug":"sandstone-orange-128-gb","options":[{"type":"color","label":"Color","value":"Sandstone Orange"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":24999,"originalPrice":27999,"stock":11,"imageBackground":"#cb8c58","imageQuery":"Vivo+T3+Pro"}]},
-    {"id":16,"name":"Vivo Y200 Pro","description":"Vivo smartphone for everyday use.","category":"Mobiles","subCategory":"Smartphones","brand":"Vivo","rating":4.0,"reviews":42,"offers":[],"variants":[{"id":"16-silk-green-128-gb","productId":16,"slug":"silk-green-128-gb","options":[{"type":"color","label":"Color","value":"Silk Green"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":24999,"originalPrice":27999,"stock":12,"imageBackground":"#9ebdaf","imageQuery":"Vivo+Y200+Pro"}]},
-    {"id":17,"name":"Vivo Y100","description":"Vivo smartphone with a colorful design.","category":"Mobiles","subCategory":"Smartphones","brand":"Vivo","rating":3.9,"reviews":38,"offers":[],"variants":[{"id":"17-metal-black-128-gb","productId":17,"slug":"metal-black-128-gb","options":[{"type":"color","label":"Color","value":"Metal Black"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":19999,"originalPrice":22999,"stock":13,"imageBackground":"#303030","imageQuery":"Vivo+Y100"}]},
-    {"id":18,"name":"Vivo T3x","description":"Vivo smartphone for daily tasks.","category":"Mobiles","subCategory":"Smartphones","brand":"Vivo","rating":4.0,"reviews":44,"offers":[],"variants":[{"id":"18-crimson-bliss-128-gb","productId":18,"slug":"crimson-bliss-128-gb","options":[{"type":"color","label":"Color","value":"Crimson Bliss"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":13999,"originalPrice":15999,"stock":15,"imageBackground":"#9b3440","imageQuery":"Vivo+T3x"}]},
-    {"id":19,"name":"Vivo Y28","description":"Vivo entry-level smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Vivo","rating":3.9,"reviews":35,"offers":[],"variants":[{"id":"19-orange-brown-128-gb","productId":19,"slug":"orange-brown-128-gb","options":[{"type":"color","label":"Color","value":"Orange Brown"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":13999,"originalPrice":15999,"stock":18,"imageBackground":"#a45c37","imageQuery":"Vivo+Y28"}]},
-    {"id":20,"name":"Vivo V40","description":"Vivo smartphone with portrait photography features.","category":"Mobiles","subCategory":"Smartphones","brand":"Vivo","rating":4.3,"reviews":62,"offers":[],"variants":[{"id":"20-titan-grey-256-gb","productId":20,"slug":"titan-grey-256-gb","options":[{"type":"color","label":"Color","value":"Titan Grey"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":34999,"originalPrice":38999,"stock":8,"imageBackground":"#777777","imageQuery":"Vivo+V40"}]},
-    {"id":21,"name":"OPPO Find X8 Pro","description":"OPPO premium smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"OPPO","rating":4.6,"reviews":55,"offers":[],"variants":[{"id":"21-space-black-512-gb","productId":21,"slug":"space-black-512-gb","options":[{"type":"color","label":"Color","value":"Space Black"},{"type":"storage","label":"Storage","value":"512 GB"}],"price":99999,"originalPrice":109999,"stock":4,"imageBackground":"#242424","imageQuery":"OPPO+Find+X8+Pro"}]},
-    {"id":22,"name":"OPPO Reno12 Pro","description":"OPPO smartphone with portrait camera features.","category":"Mobiles","subCategory":"Smartphones","brand":"OPPO","rating":4.3,"reviews":60,"offers":[],"variants":[{"id":"22-sunset-gold-256-gb","productId":22,"slug":"sunset-gold-256-gb","options":[{"type":"color","label":"Color","value":"Sunset Gold"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":36999,"originalPrice":40999,"stock":8,"imageBackground":"#c6a46d","imageQuery":"OPPO+Reno12+Pro"}]},
-    {"id":23,"name":"OPPO Reno12","description":"OPPO smartphone with a slim design.","category":"Mobiles","subCategory":"Smartphones","brand":"OPPO","rating":4.1,"reviews":52,"offers":[],"variants":[{"id":"23-astro-silver-256-gb","productId":23,"slug":"astro-silver-256-gb","options":[{"type":"color","label":"Color","value":"Astro Silver"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":32999,"originalPrice":36999,"stock":9,"imageBackground":"#b9bdc4","imageQuery":"OPPO+Reno12"}]},
-    {"id":24,"name":"OPPO F27 Pro+","description":"OPPO smartphone with a durable design.","category":"Mobiles","subCategory":"Smartphones","brand":"OPPO","rating":4.0,"reviews":43,"offers":[],"variants":[{"id":"24-midnight-navy-128-gb","productId":24,"slug":"midnight-navy-128-gb","options":[{"type":"color","label":"Color","value":"Midnight Navy"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":27999,"originalPrice":30999,"stock":10,"imageBackground":"#253654","imageQuery":"OPPO+F27+Pro+Plus"}]},
-    {"id":25,"name":"OPPO F27","description":"OPPO smartphone for everyday use.","category":"Mobiles","subCategory":"Smartphones","brand":"OPPO","rating":3.9,"reviews":37,"offers":[],"variants":[{"id":"25-emerald-green-128-gb","productId":25,"slug":"emerald-green-128-gb","options":[{"type":"color","label":"Color","value":"Emerald Green"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":22999,"originalPrice":25999,"stock":11,"imageBackground":"#28735e","imageQuery":"OPPO+F27"}]},
-    {"id":26,"name":"OPPO K12x","description":"OPPO smartphone for daily tasks.","category":"Mobiles","subCategory":"Smartphones","brand":"OPPO","rating":3.9,"reviews":32,"offers":[],"variants":[{"id":"26-breeze-blue-128-gb","productId":26,"slug":"breeze-blue-128-gb","options":[{"type":"color","label":"Color","value":"Breeze Blue"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":12999,"originalPrice":14999,"stock":16,"imageBackground":"#8dbbd2","imageQuery":"OPPO+K12x"}]},
-    {"id":27,"name":"OPPO A3 Pro","description":"OPPO smartphone with a durable build.","category":"Mobiles","subCategory":"Smartphones","brand":"OPPO","rating":3.9,"reviews":30,"offers":[],"variants":[{"id":"27-moonlight-purple-128-gb","productId":27,"slug":"moonlight-purple-128-gb","options":[{"type":"color","label":"Color","value":"Moonlight Purple"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":17999,"originalPrice":19999,"stock":13,"imageBackground":"#9b8ab5","imageQuery":"OPPO+A3+Pro"}]},
-    {"id":28,"name":"OPPO A3x","description":"OPPO entry-level smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"OPPO","rating":3.8,"reviews":26,"offers":[],"variants":[{"id":"28-starry-purple-64-gb","productId":28,"slug":"starry-purple-64-gb","options":[{"type":"color","label":"Color","value":"Starry Purple"},{"type":"storage","label":"Storage","value":"64 GB"}],"price":8999,"originalPrice":10999,"stock":20,"imageBackground":"#77628f","imageQuery":"OPPO+A3x"}]},
-    {"id":29,"name":"OPPO A60","description":"OPPO smartphone for everyday use.","category":"Mobiles","subCategory":"Smartphones","brand":"OPPO","rating":3.9,"reviews":29,"offers":[],"variants":[{"id":"29-ripple-blue-128-gb","productId":29,"slug":"ripple-blue-128-gb","options":[{"type":"color","label":"Color","value":"Ripple Blue"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":15999,"originalPrice":17999,"stock":14,"imageBackground":"#6494ba","imageQuery":"OPPO+A60"}]},
-    {"id":30,"name":"OPPO Reno11 Pro","description":"OPPO smartphone with premium portrait features.","category":"Mobiles","subCategory":"Smartphones","brand":"OPPO","rating":4.2,"reviews":48,"offers":[],"variants":[{"id":"30-pearl-white-256-gb","productId":30,"slug":"pearl-white-256-gb","options":[{"type":"color","label":"Color","value":"Pearl White"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":39999,"originalPrice":44999,"stock":6,"imageBackground":"#e8e3dc","imageQuery":"OPPO+Reno11+Pro"}]},
-    {"id":31,"name":"OnePlus 12","description":"OnePlus flagship smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"OnePlus","rating":4.6,"reviews":130,"offers":[],"variants":[{"id":"31-flowy-emerald-256-gb","productId":31,"slug":"flowy-emerald-256-gb","options":[{"type":"color","label":"Color","value":"Flowy Emerald"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":64999,"originalPrice":69999,"stock":7,"imageBackground":"#38765e","imageQuery":"OnePlus+12"}]},
-    {"id":32,"name":"OnePlus 12R","description":"OnePlus performance smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"OnePlus","rating":4.4,"reviews":105,"offers":[],"variants":[{"id":"32-cool-blue-256-gb","productId":32,"slug":"cool-blue-256-gb","options":[{"type":"color","label":"Color","value":"Cool Blue"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":42999,"originalPrice":46999,"stock":9,"imageBackground":"#5485ae","imageQuery":"OnePlus+12R"}]},
-    {"id":33,"name":"OnePlus 11 5G","description":"OnePlus flagship smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"OnePlus","rating":4.4,"reviews":88,"offers":[],"variants":[{"id":"33-titan-black-128-gb","productId":33,"slug":"titan-black-128-gb","options":[{"type":"color","label":"Color","value":"Titan Black"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":56999,"originalPrice":61999,"stock":6,"imageBackground":"#292929","imageQuery":"OnePlus+11"}]},
-    {"id":34,"name":"OnePlus Nord 4","description":"OnePlus mid-range smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"OnePlus","rating":4.3,"reviews":73,"offers":[],"variants":[{"id":"34-mercourial-silver-256-gb","productId":34,"slug":"mercourial-silver-256-gb","options":[{"type":"color","label":"Color","value":"Mercourial Silver"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":32999,"originalPrice":35999,"stock":10,"imageBackground":"#b8b8b8","imageQuery":"OnePlus+Nord+4"}]},
-    {"id":35,"name":"OnePlus Nord CE4","description":"OnePlus smartphone for everyday use.","category":"Mobiles","subCategory":"Smartphones","brand":"OnePlus","rating":4.2,"reviews":65,"offers":[],"variants":[{"id":"35-dark-chrome-128-gb","productId":35,"slug":"dark-chrome-128-gb","options":[{"type":"color","label":"Color","value":"Dark Chrome"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":24999,"originalPrice":27999,"stock":12,"imageBackground":"#383838","imageQuery":"OnePlus+Nord+CE4"}]},
-    {"id":36,"name":"OnePlus Nord CE4 Lite","description":"OnePlus affordable smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"OnePlus","rating":4.0,"reviews":48,"offers":[],"variants":[{"id":"36-mega-blue-128-gb","productId":36,"slug":"mega-blue-128-gb","options":[{"type":"color","label":"Color","value":"Mega Blue"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":19999,"originalPrice":21999,"stock":14,"imageBackground":"#3c83bd","imageQuery":"OnePlus+Nord+CE4+Lite"}]},
-    {"id":37,"name":"OnePlus Open","description":"OnePlus foldable smartphone.","category":"Mobiles","subCategory":"Foldable Smartphones","brand":"OnePlus","rating":4.5,"reviews":40,"offers":[],"variants":[{"id":"37-emerald-dusk-512-gb","productId":37,"slug":"emerald-dusk-512-gb","options":[{"type":"color","label":"Color","value":"Emerald Dusk"},{"type":"storage","label":"Storage","value":"512 GB"}],"price":139999,"originalPrice":149999,"stock":3,"imageBackground":"#286448","imageQuery":"OnePlus+Open"}]},
-    {"id":38,"name":"OnePlus 10 Pro","description":"OnePlus premium smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"OnePlus","rating":4.2,"reviews":58,"offers":[],"variants":[{"id":"38-volcanic-black-128-gb","productId":38,"slug":"volcanic-black-128-gb","options":[{"type":"color","label":"Color","value":"Volcanic Black"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":54999,"originalPrice":59999,"stock":5,"imageBackground":"#282828","imageQuery":"OnePlus+10+Pro"}]},
-    {"id":39,"name":"OnePlus Nord 3 5G","description":"OnePlus smartphone with a smooth display.","category":"Mobiles","subCategory":"Smartphones","brand":"OnePlus","rating":4.2,"reviews":54,"offers":[],"variants":[{"id":"39-misty-green-128-gb","productId":39,"slug":"misty-green-128-gb","options":[{"type":"color","label":"Color","value":"Misty Green"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":27999,"originalPrice":30999,"stock":8,"imageBackground":"#93b7a7","imageQuery":"OnePlus+Nord+3"}]},
-    {"id":40,"name":"OnePlus Nord CE3 Lite","description":"OnePlus smartphone for everyday tasks.","category":"Mobiles","subCategory":"Smartphones","brand":"OnePlus","rating":4.0,"reviews":46,"offers":[],"variants":[{"id":"40-pastel-lime-128-gb","productId":40,"slug":"pastel-lime-128-gb","options":[{"type":"color","label":"Color","value":"Pastel Lime"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":17999,"originalPrice":19999,"stock":13,"imageBackground":"#c5d685","imageQuery":"OnePlus+Nord+CE3+Lite"}]},
-    {"id":41,"name":"Apple iPhone 16","description":"Apple smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Apple","rating":4.6,"reviews":150,"offers":[],"variants":[{"id":"41-black-128-gb","productId":41,"slug":"black-128-gb","options":[{"type":"color","label":"Color","value":"Black"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":79900,"originalPrice":79900,"stock":8,"imageBackground":"#222222","imageQuery":"iPhone+16"}]},
-    {"id":42,"name":"Apple iPhone 16 Plus","description":"Apple smartphone with a large display.","category":"Mobiles","subCategory":"Smartphones","brand":"Apple","rating":4.5,"reviews":90,"offers":[],"variants":[{"id":"42-ultramarine-128-gb","productId":42,"slug":"ultramarine-128-gb","options":[{"type":"color","label":"Color","value":"Ultramarine"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":89900,"originalPrice":89900,"stock":6,"imageBackground":"#526fc4","imageQuery":"iPhone+16+Plus"}]},
-    {"id":43,"name":"Apple iPhone 16 Pro","description":"Apple premium smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Apple","rating":4.7,"reviews":112,"offers":[],"variants":[{"id":"43-desert-titanium-256-gb","productId":43,"slug":"desert-titanium-256-gb","options":[{"type":"color","label":"Color","value":"Desert Titanium"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":119900,"originalPrice":119900,"stock":5,"imageBackground":"#b89d7b","imageQuery":"iPhone+16+Pro"}]},
-    {"id":44,"name":"Apple iPhone 16 Pro Max","description":"Apple flagship smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Apple","rating":4.8,"reviews":135,"offers":[],"variants":[{"id":"44-natural-titanium-256-gb","productId":44,"slug":"natural-titanium-256-gb","options":[{"type":"color","label":"Color","value":"Natural Titanium"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":144900,"originalPrice":144900,"stock":4,"imageBackground":"#aaa69f","imageQuery":"iPhone+16+Pro+Max"}]},
-    {"id":45,"name":"Apple iPhone 15","description":"Apple smartphone with a dynamic display.","category":"Mobiles","subCategory":"Smartphones","brand":"Apple","rating":4.5,"reviews":125,"offers":[],"variants":[{"id":"45-pink-128-gb","productId":45,"slug":"pink-128-gb","options":[{"type":"color","label":"Color","value":"Pink"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":69900,"originalPrice":69900,"stock":9,"imageBackground":"#e9b7c4","imageQuery":"iPhone+15"}]},
-    {"id":46,"name":"Apple iPhone 15 Plus","description":"Apple smartphone with a large display.","category":"Mobiles","subCategory":"Smartphones","brand":"Apple","rating":4.4,"reviews":82,"offers":[],"variants":[{"id":"46-blue-128-gb","productId":46,"slug":"blue-128-gb","options":[{"type":"color","label":"Color","value":"Blue"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":79900,"originalPrice":79900,"stock":7,"imageBackground":"#8ca9d1","imageQuery":"iPhone+15+Plus"}]},
-    {"id":47,"name":"Apple iPhone 15 Pro","description":"Apple premium smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Apple","rating":4.6,"reviews":98,"offers":[],"variants":[{"id":"47-blue-titanium-128-gb","productId":47,"slug":"blue-titanium-128-gb","options":[{"type":"color","label":"Color","value":"Blue Titanium"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":109900,"originalPrice":109900,"stock":4,"imageBackground":"#53687d","imageQuery":"iPhone+15+Pro"}]},
-    {"id":48,"name":"Apple iPhone 15 Pro Max","description":"Apple flagship smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Apple","rating":4.7,"reviews":117,"offers":[],"variants":[{"id":"48-black-titanium-256-gb","productId":48,"slug":"black-titanium-256-gb","options":[{"type":"color","label":"Color","value":"Black Titanium"},{"type":"storage","label":"Storage","value":"256 GB"}],"price":134900,"originalPrice":134900,"stock":3,"imageBackground":"#292929","imageQuery":"iPhone+15+Pro+Max"}]},
-    {"id":49,"name":"Apple iPhone 14","description":"Apple smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Apple","rating":4.3,"reviews":105,"offers":[],"variants":[{"id":"49-midnight-128-gb","productId":49,"slug":"midnight-128-gb","options":[{"type":"color","label":"Color","value":"Midnight"},{"type":"storage","label":"Storage","value":"128 GB"}],"price":59900,"originalPrice":59900,"stock":10,"imageBackground":"#292c35","imageQuery":"iPhone+14"}]},
-    {"id":50,"name":"Apple iPhone SE (3rd generation)","description":"Compact Apple smartphone.","category":"Mobiles","subCategory":"Smartphones","brand":"Apple","rating":4.1,"reviews":70,"offers":[],"variants":[{"id":"50-midnight-64-gb","productId":50,"slug":"midnight-64-gb","options":[{"type":"color","label":"Color","value":"Midnight"},{"type":"storage","label":"Storage","value":"64 GB"}],"price":49900,"originalPrice":49900,"stock":5,"imageBackground":"#292c35","imageQuery":"iPhone+SE+3rd+generation"}]}
+    {
+      "id": 1,
+      "name": "Samsung Galaxy A55",
+      "description": "Samsung smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Samsung",
+      "rating": 4.2,
+      "reviews": 120,
+      "offers": [],
+      "variants": [
+        {
+          "id": "1-awesome-iceblue-128-gb",
+          "productId": 1,
+          "slug": "awesome-iceblue-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Awesome Iceblue"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 39999,
+          "originalPrice": 42999,
+          "stock": 10,
+          "images": [
+            "https://a.scdn.gr/images/sku_main_images/051320/51320858/20240314111454_samsung_galaxy_a55_5g_dual_sim_8gb_128gb_awesome_iceblue.jpeg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 2,
+      "name": "Samsung Galaxy S24",
+      "description": "Premium Samsung smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Samsung",
+      "rating": 1.7,
+      "reviews": 11,
+      "offers": [
+        "Bank Offer Flat ₹1,500 off on select cards"
+      ],
+      "variants": [
+        {
+          "id": "2-onyx-black-128-gb",
+          "productId": 2,
+          "slug": "onyx-black-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Onyx Black"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 74999,
+          "originalPrice": 81999,
+          "stock": 12,
+          "images": [
+            "https://appdom.ru/image/cache/catalog/galaxy/s24/samsung-galaxy-s24-black-1000x1000.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 3,
+      "name": "Samsung Galaxy S24+",
+      "description": "Premium Samsung smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Samsung",
+      "rating": 4.4,
+      "reviews": 85,
+      "offers": [],
+      "variants": [
+        {
+          "id": "3-cobalt-violet-256-gb",
+          "productId": 3,
+          "slug": "cobalt-violet-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Cobalt Violet"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 99999,
+          "originalPrice": 109999,
+          "stock": 8,
+          "images": [
+            "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Samsung-Galaxy-S24-Plus-Cobalt-Violet.jpg?v=1708336894"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 4,
+      "name": "Samsung Galaxy S24 Ultra",
+      "description": "Premium Samsung smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Samsung",
+      "rating": 4.6,
+      "reviews": 140,
+      "offers": [],
+      "variants": [
+        {
+          "id": "4-titanium-gray-256-gb",
+          "productId": 4,
+          "slug": "titanium-gray-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Titanium Gray"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 129999,
+          "originalPrice": 139999,
+          "stock": 6,
+          "images": [
+            "https://onewaymobile.vn/upload/1Samsung/S24%20Ultra/3.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 5,
+      "name": "Samsung Galaxy Z Flip6",
+      "description": "Foldable Samsung smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Foldable Smartphones",
+      "brand": "Samsung",
+      "rating": 4.3,
+      "reviews": 60,
+      "offers": [],
+      "variants": [
+        {
+          "id": "5-silver-shadow-256-gb",
+          "productId": 5,
+          "slug": "silver-shadow-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Silver Shadow"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 109999,
+          "originalPrice": 119999,
+          "stock": 5,
+          "images": [
+            "https://cdn.shopify.com/s/files/1/0630/5362/7541/files/SM-F741BZSGEUB.jpg?v=1741009139"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 6,
+      "name": "Samsung Galaxy Z Fold6",
+      "description": "Foldable Samsung smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Foldable Smartphones",
+      "brand": "Samsung",
+      "rating": 4.5,
+      "reviews": 45,
+      "offers": [],
+      "variants": [
+        {
+          "id": "6-navy-256-gb",
+          "productId": 6,
+          "slug": "navy-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Navy"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 164999,
+          "originalPrice": 174999,
+          "stock": 4,
+          "images": [
+            "https://static01.galaxus.com/productimages/8/5/9/4/8/9/6/1/9/4/8/5/3/0/3/7/1/5/7/87807b76-bb44-43bc-a88e-af7d2eff5c4b_cropped.png_720.jpeg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 7,
+      "name": "Samsung Galaxy A35",
+      "description": "Samsung smartphone for everyday use.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Samsung",
+      "rating": 4.0,
+      "reviews": 95,
+      "offers": [],
+      "variants": [
+        {
+          "id": "7-awesome-navy-128-gb",
+          "productId": 7,
+          "slug": "awesome-navy-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Awesome Navy"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 30999,
+          "originalPrice": 33999,
+          "stock": 14,
+          "images": [
+            "https://www.neobyte.es/116254-medium_default/samsung-galaxy-a35-8gb-256gb-5g-awesome-navy-smartphone-66.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 8,
+      "name": "Samsung Galaxy M55",
+      "description": "Samsung smartphone with a large display.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Samsung",
+      "rating": 4.1,
+      "reviews": 72,
+      "offers": [],
+      "variants": [
+        {
+          "id": "8-light-green-128-gb",
+          "productId": 8,
+          "slug": "light-green-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Light Green"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 26999,
+          "originalPrice": 29999,
+          "stock": 9,
+          "images": [
+            "https://sota.store/image/cache/catalog/Samsung-3/samsung-m55-m556-grn-01-1600x1600.webp"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 9,
+      "name": "Samsung Galaxy M35",
+      "description": "Samsung smartphone for everyday entertainment.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Samsung",
+      "rating": 4.0,
+      "reviews": 50,
+      "offers": [],
+      "variants": [
+        {
+          "id": "9-dark-blue-128-gb",
+          "productId": 9,
+          "slug": "dark-blue-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Dark Blue"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 19999,
+          "originalPrice": 22999,
+          "stock": 16,
+          "images": [
+            "https://cdn.tehnoezh.ua/0/0/0/2/5/6/5/9/000205659_545_545.webp"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 10,
+      "name": "Samsung Galaxy S23 FE",
+      "description": "Samsung smartphone with premium features.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Samsung",
+      "rating": 4.2,
+      "reviews": 110,
+      "offers": [],
+      "variants": [
+        {
+          "id": "10-graphite-128-gb",
+          "productId": 10,
+          "slug": "graphite-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Graphite"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 49999,
+          "originalPrice": 54999,
+          "stock": 7,
+          "images": [
+            "https://s13emagst.akamaized.net/products/63667/63666121/images/res_fc207ef6eeddb885105a92e1311b2c5d.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 11,
+      "name": "Vivo X100",
+      "description": "Vivo smartphone with premium camera features.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Vivo",
+      "rating": 4.5,
+      "reviews": 90,
+      "offers": [],
+      "variants": [
+        {
+          "id": "11-startrail-blue-256-gb",
+          "productId": 11,
+          "slug": "startrail-blue-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Startrail Blue"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 63999,
+          "originalPrice": 69999,
+          "stock": 7,
+          "images": [
+            "https://asia-exstatic-vivofs.vivo.com/PSee2l50xoirPK7y/1705043298432/6e39b5d9181ecf75ad30afa5aaec0693.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 12,
+      "name": "Vivo V30 Pro",
+      "description": "Vivo smartphone with portrait camera features.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Vivo",
+      "rating": 4.3,
+      "reviews": 76,
+      "offers": [],
+      "variants": [
+        {
+          "id": "12-andaman-blue-256-gb",
+          "productId": 12,
+          "slug": "andaman-blue-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Andaman Blue"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 41999,
+          "originalPrice": 46999,
+          "stock": 8,
+          "images": [
+            "https://cdn.beebom.com/mobile/2024/02/15-1.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 13,
+      "name": "Vivo V30",
+      "description": "Vivo smartphone with a slim design.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Vivo",
+      "rating": 4.2,
+      "reviews": 65,
+      "offers": [],
+      "variants": [
+        {
+          "id": "13-peacock-green-128-gb",
+          "productId": 13,
+          "slug": "peacock-green-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Peacock Green"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 33999,
+          "originalPrice": 37999,
+          "stock": 10,
+          "images": [
+            "https://media.tatacroma.com/Croma%20Assets/Communication/Mobiles/Images/305300_0_ypyl7e.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 14,
+      "name": "Vivo T3 Ultra",
+      "description": "Vivo performance smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Vivo",
+      "rating": 4.2,
+      "reviews": 58,
+      "offers": [],
+      "variants": [
+        {
+          "id": "14-frost-green-128-gb",
+          "productId": 14,
+          "slug": "frost-green-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Frost Green"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 31999,
+          "originalPrice": 35999,
+          "stock": 9,
+          "images": [
+            "https://ddfndelma2gpn.cloudfront.net/color/1987/vivo_T3_Ultra_Frost_Green.webp"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 15,
+      "name": "Vivo T3 Pro",
+      "description": "Vivo smartphone for performance and entertainment.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Vivo",
+      "rating": 4.1,
+      "reviews": 49,
+      "offers": [],
+      "variants": [
+        {
+          "id": "15-sandstone-orange-128-gb",
+          "productId": 15,
+          "slug": "sandstone-orange-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Sandstone Orange"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 24999,
+          "originalPrice": 27999,
+          "stock": 11,
+          "images": [
+            "https://www.navinmart.com/cdn/shop/files/o1_04d7b666-8cdf-43ed-b863-b68d5449a7dc.webp?v=1743753564&width=750"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 16,
+      "name": "Vivo Y200 Pro",
+      "description": "Vivo smartphone for everyday use.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Vivo",
+      "rating": 4.0,
+      "reviews": 42,
+      "offers": [],
+      "variants": [
+        {
+          "id": "16-silk-green-128-gb",
+          "productId": 16,
+          "slug": "silk-green-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Silk Green"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 24999,
+          "originalPrice": 27999,
+          "stock": 12,
+          "images": [
+            "https://i.ebayimg.com/images/g/em0AAOSwyPNmTb32/s-l1200.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 17,
+      "name": "Vivo Y100",
+      "description": "Vivo smartphone with a colorful design.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Vivo",
+      "rating": 3.9,
+      "reviews": 38,
+      "offers": [],
+      "variants": [
+        {
+          "id": "17-metal-black-128-gb",
+          "productId": 17,
+          "slug": "metal-black-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Metal Black"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 19999,
+          "originalPrice": 22999,
+          "stock": 13,
+          "images": [
+            "https://mc.bajajfinserv.in/media/catalog/product/v/i/vivoy1005g8gb128gbmetalblack_base.jpeg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 18,
+      "name": "Vivo T3x",
+      "description": "Vivo smartphone for daily tasks.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Vivo",
+      "rating": 4.0,
+      "reviews": 44,
+      "offers": [],
+      "variants": [
+        {
+          "id": "18-crimson-bliss-128-gb",
+          "productId": 18,
+          "slug": "crimson-bliss-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Crimson Bliss"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 13999,
+          "originalPrice": 15999,
+          "stock": 15,
+          "images": [
+            "https://media.tatacroma.com/Croma%20Assets/Communication/Mobiles/Images/306358_0_yopn1p.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 19,
+      "name": "Vivo Y28",
+      "description": "Vivo entry-level smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Vivo",
+      "rating": 3.9,
+      "reviews": 35,
+      "offers": [],
+      "variants": [
+        {
+          "id": "19-orange-brown-128-gb",
+          "productId": 19,
+          "slug": "orange-brown-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Orange Brown"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 13999,
+          "originalPrice": 15999,
+          "stock": 18,
+          "images": [
+            "https://asia-exstatic-vivofs.vivo.com/PSee2l50xoirPK7y/1719228056670/58dc92c0faf829fbb2dcf920859b9cf9.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 20,
+      "name": "Vivo V40",
+      "description": "Vivo smartphone with portrait photography features.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Vivo",
+      "rating": 4.3,
+      "reviews": 62,
+      "offers": [],
+      "variants": [
+        {
+          "id": "20-titan-grey-256-gb",
+          "productId": 20,
+          "slug": "titan-grey-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Titan Grey"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 34999,
+          "originalPrice": 38999,
+          "stock": 8,
+          "images": [
+            "https://media-ik.croma.com/Croma%20Assets/Communication/Mobiles/Images/308796_0_p58edl.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 21,
+      "name": "OPPO Find X8 Pro",
+      "description": "OPPO premium smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OPPO",
+      "rating": 4.6,
+      "reviews": 55,
+      "offers": [],
+      "variants": [
+        {
+          "id": "21-space-black-512-gb",
+          "productId": 21,
+          "slug": "space-black-512-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Space Black"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "512 GB"
+            }
+          ],
+          "price": 99999,
+          "originalPrice": 109999,
+          "stock": 4,
+          "images": [
+            "https://www.welectronics.com/images/stories/virtuemart/product/oppo-find-x8-pro-blk4.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 22,
+      "name": "OPPO Reno12 Pro",
+      "description": "OPPO smartphone with portrait camera features.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OPPO",
+      "rating": 4.3,
+      "reviews": 60,
+      "offers": [],
+      "variants": [
+        {
+          "id": "22-sunset-gold-256-gb",
+          "productId": 22,
+          "slug": "sunset-gold-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Sunset Gold"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 36999,
+          "originalPrice": 40999,
+          "stock": 8,
+          "images": [
+            "https://vdaadmin.venusdigitalarcade.in/media/catalog/product/cache/a4aa45628d61667009e8bfd73fcc061b/3/_/3_38_8.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 23,
+      "name": "OPPO Reno12",
+      "description": "OPPO smartphone with a slim design.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OPPO",
+      "rating": 4.1,
+      "reviews": 52,
+      "offers": [],
+      "variants": [
+        {
+          "id": "23-astro-silver-256-gb",
+          "productId": 23,
+          "slug": "astro-silver-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Astro Silver"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 32999,
+          "originalPrice": 36999,
+          "stock": 9,
+          "images": [
+            "https://wo.ua/upload/resize_cache/iblock/a91/790_790_1/bnrzbevo296esgzkse1iofyjr1x4zsm8.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 24,
+      "name": "OPPO F27 Pro+",
+      "description": "OPPO smartphone with a durable design.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OPPO",
+      "rating": 4.0,
+      "reviews": 43,
+      "offers": [],
+      "variants": [
+        {
+          "id": "24-midnight-navy-128-gb",
+          "productId": 24,
+          "slug": "midnight-navy-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Midnight Navy"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 27999,
+          "originalPrice": 30999,
+          "stock": 10,
+          "images": [
+            "https://vdaadmin.venusdigitalarcade.in/media/catalog/product/cache/a4aa45628d61667009e8bfd73fcc061b/1/2/12_17_1.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 25,
+      "name": "OPPO F27",
+      "description": "OPPO smartphone for everyday use.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OPPO",
+      "rating": 3.9,
+      "reviews": 37,
+      "offers": [],
+      "variants": [
+        {
+          "id": "25-emerald-green-128-gb",
+          "productId": 25,
+          "slug": "emerald-green-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Emerald Green"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 22999,
+          "originalPrice": 25999,
+          "stock": 11,
+          "images": [
+            "https://mc.bajajfinserv.in/media/catalog/product/o/p/oppof27green_add4.jpeg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 26,
+      "name": "OPPO K12x",
+      "description": "OPPO smartphone for daily tasks.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OPPO",
+      "rating": 3.9,
+      "reviews": 32,
+      "offers": [],
+      "variants": [
+        {
+          "id": "26-breeze-blue-128-gb",
+          "productId": 26,
+          "slug": "breeze-blue-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Breeze Blue"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 12999,
+          "originalPrice": 14999,
+          "stock": 16,
+          "images": [
+            "https://media.tatacroma.com/Croma%20Assets/Communication/Mobiles/Images/308826_9_km6ig5.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 27,
+      "name": "OPPO A3 Pro",
+      "description": "OPPO smartphone with a durable build.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OPPO",
+      "rating": 3.9,
+      "reviews": 30,
+      "offers": [],
+      "variants": [
+        {
+          "id": "27-moonlight-purple-128-gb",
+          "productId": 27,
+          "slug": "moonlight-purple-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Moonlight Purple"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 17999,
+          "originalPrice": 19999,
+          "stock": 13,
+          "images": [
+            "https://down-my.img.susercontent.com/file/my-11134207-7rask-m2nwl5vdaecm13"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 28,
+      "name": "OPPO A3x",
+      "description": "OPPO entry-level smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OPPO",
+      "rating": 3.8,
+      "reviews": 26,
+      "offers": [],
+      "variants": [
+        {
+          "id": "28-starry-purple-64-gb",
+          "productId": 28,
+          "slug": "starry-purple-64-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Starry Purple"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "64 GB"
+            }
+          ],
+          "price": 8999,
+          "originalPrice": 10999,
+          "stock": 20,
+          "images": [
+            "https://file1.jyes.com.tw/data/goods/gallery/202511/1762927651164841690.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 29,
+      "name": "OPPO A60",
+      "description": "OPPO smartphone for everyday use.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OPPO",
+      "rating": 3.9,
+      "reviews": 29,
+      "offers": [],
+      "variants": [
+        {
+          "id": "29-ripple-blue-128-gb",
+          "productId": 29,
+          "slug": "ripple-blue-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Ripple Blue"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 15999,
+          "originalPrice": 17999,
+          "stock": 14,
+          "images": [
+            "https://cdnbase.comfy.ua/media/catalog/product/cache/5/image/600x/9df78eab33525d08d6e5fb8d27136e95/a/6/a60-l4__product_images__ripple_blue__back__rgb_1_.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 30,
+      "name": "OPPO Reno11 Pro",
+      "description": "OPPO smartphone with premium portrait features.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OPPO",
+      "rating": 4.2,
+      "reviews": 48,
+      "offers": [],
+      "variants": [
+        {
+          "id": "30-pearl-white-256-gb",
+          "productId": 30,
+          "slug": "pearl-white-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Pearl White"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 39999,
+          "originalPrice": 44999,
+          "stock": 6,
+          "images": [
+            "https://down-my.img.susercontent.com/file/my-11134207-7r98w-lrya8msyliifb3"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 31,
+      "name": "OnePlus 12",
+      "description": "OnePlus flagship smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OnePlus",
+      "rating": 4.6,
+      "reviews": 130,
+      "offers": [],
+      "variants": [
+        {
+          "id": "31-flowy-emerald-256-gb",
+          "productId": 31,
+          "slug": "flowy-emerald-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Flowy Emerald"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 64999,
+          "originalPrice": 69999,
+          "stock": 7,
+          "images": [
+            "https://i.hinnavaatlus.ee/p/1200x630f/ec/93/oneplus-12-flowy-emerald11c.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 32,
+      "name": "OnePlus 12R",
+      "description": "OnePlus performance smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OnePlus",
+      "rating": 4.4,
+      "reviews": 105,
+      "offers": [],
+      "variants": [
+        {
+          "id": "32-cool-blue-256-gb",
+          "productId": 32,
+          "slug": "cool-blue-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Cool Blue"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 42999,
+          "originalPrice": 46999,
+          "stock": 9,
+          "images": [
+            "https://dealayo.com/media/catalog/product/o/n/oneplus-12r-16gb256gb-coolblue-1.jpg?height=265&image-type=image&store=default&width=265"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 33,
+      "name": "OnePlus 11 5G",
+      "description": "OnePlus flagship smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OnePlus",
+      "rating": 4.4,
+      "reviews": 88,
+      "offers": [],
+      "variants": [
+        {
+          "id": "33-titan-black-128-gb",
+          "productId": 33,
+          "slug": "titan-black-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Titan Black"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 56999,
+          "originalPrice": 61999,
+          "stock": 6,
+          "images": [
+            "https://www.vopmart.com/media/catalog/product/cache/ee14c5ab36c97d39d331f867fa3bee63/o/n/oneplus-11-b.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 34,
+      "name": "OnePlus Nord 4",
+      "description": "OnePlus mid-range smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OnePlus",
+      "rating": 4.3,
+      "reviews": 73,
+      "offers": [],
+      "variants": [
+        {
+          "id": "34-mercourial-silver-256-gb",
+          "productId": 34,
+          "slug": "mercourial-silver-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Mercourial Silver"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 32999,
+          "originalPrice": 35999,
+          "stock": 10,
+          "images": [
+            "https://m.media-amazon.com/images/I/61JOYUJbhcL._SL1500_.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 35,
+      "name": "OnePlus Nord CE4",
+      "description": "OnePlus smartphone for everyday use.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OnePlus",
+      "rating": 4.2,
+      "reviews": 65,
+      "offers": [],
+      "variants": [
+        {
+          "id": "35-dark-chrome-128-gb",
+          "productId": 35,
+          "slug": "dark-chrome-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Dark Chrome"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 24999,
+          "originalPrice": 27999,
+          "stock": 12,
+          "images": [
+            "https://miport.ru/assets/img/products/oneplus-nord-ce-4-5g/grey/3.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 36,
+      "name": "OnePlus Nord CE4 Lite",
+      "description": "OnePlus affordable smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OnePlus",
+      "rating": 4.0,
+      "reviews": 48,
+      "offers": [],
+      "variants": [
+        {
+          "id": "36-mega-blue-128-gb",
+          "productId": 36,
+          "slug": "mega-blue-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Mega Blue"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 19999,
+          "originalPrice": 21999,
+          "stock": 14,
+          "images": [
+            "https://vasanthandco.in/UploadedFiles/productimages/20251027014016-Untitled-36.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 37,
+      "name": "OnePlus Open",
+      "description": "OnePlus foldable smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Foldable Smartphones",
+      "brand": "OnePlus",
+      "rating": 4.5,
+      "reviews": 40,
+      "offers": [],
+      "variants": [
+        {
+          "id": "37-emerald-dusk-512-gb",
+          "productId": 37,
+          "slug": "emerald-dusk-512-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Emerald Dusk"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "512 GB"
+            }
+          ],
+          "price": 139999,
+          "originalPrice": 149999,
+          "stock": 3,
+          "images": [
+            "https://cdn.idealo.com/folder/Product/203390/6/203390669/s1_produktbild_max_4/oneplus-open-512gb-emerald-dusk.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 38,
+      "name": "OnePlus 10 Pro",
+      "description": "OnePlus premium smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OnePlus",
+      "rating": 4.2,
+      "reviews": 58,
+      "offers": [],
+      "variants": [
+        {
+          "id": "38-volcanic-black-128-gb",
+          "productId": 38,
+          "slug": "volcanic-black-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Volcanic Black"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 54999,
+          "originalPrice": 59999,
+          "stock": 5,
+          "images": [
+            "https://oasisstatics.oneplus.cn/content/dam/oasis/page/2022/operation/january/0107/10-pro-spec/black.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 39,
+      "name": "OnePlus Nord 3 5G",
+      "description": "OnePlus smartphone with a smooth display.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OnePlus",
+      "rating": 4.2,
+      "reviews": 54,
+      "offers": [],
+      "variants": [
+        {
+          "id": "39-misty-green-128-gb",
+          "productId": 39,
+          "slug": "misty-green-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Misty Green"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 27999,
+          "originalPrice": 30999,
+          "stock": 8,
+          "images": [
+            "https://static.digit.in/default/oneplus-nord-3-5g-2-420354eee4.jpeg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 40,
+      "name": "OnePlus Nord CE3 Lite",
+      "description": "OnePlus smartphone for everyday tasks.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "OnePlus",
+      "rating": 4.0,
+      "reviews": 46,
+      "offers": [],
+      "variants": [
+        {
+          "id": "40-pastel-lime-128-gb",
+          "productId": 40,
+          "slug": "pastel-lime-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Pastel Lime"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 17999,
+          "originalPrice": 19999,
+          "stock": 13,
+          "images": [
+            "https://cdn.beebom.com/mobile/2024/01/Untitled-design-2024-02-27T150836.597.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 41,
+      "name": "Apple iPhone 16",
+      "description": "Apple smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Apple",
+      "rating": 4.6,
+      "reviews": 150,
+      "offers": [],
+      "variants": [
+        {
+          "id": "41-black-128-gb",
+          "productId": 41,
+          "slug": "black-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Black"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 79900,
+          "originalPrice": 79900,
+          "stock": 8,
+          "images": [
+            "https://vivacom.bg/upload/img_50013249_apple_iphone_16_128gb_black_large_143687_20250711_120243.png"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 42,
+      "name": "Apple iPhone 16 Plus",
+      "description": "Apple smartphone with a large display.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Apple",
+      "rating": 4.5,
+      "reviews": 90,
+      "offers": [],
+      "variants": [
+        {
+          "id": "42-ultramarine-128-gb",
+          "productId": 42,
+          "slug": "ultramarine-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Ultramarine"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 89900,
+          "originalPrice": 89900,
+          "stock": 6,
+          "images": [
+            "https://www.coolmatica.pt/store/323286-large_default/smartphone-apple-iphone-16-plus-128gb-67-5g-azul-ultramar.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 43,
+      "name": "Apple iPhone 16 Pro",
+      "description": "Apple premium smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Apple",
+      "rating": 4.7,
+      "reviews": 112,
+      "offers": [],
+      "variants": [
+        {
+          "id": "43-desert-titanium-256-gb",
+          "productId": 43,
+          "slug": "desert-titanium-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Desert Titanium"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 119900,
+          "originalPrice": 119900,
+          "stock": 5,
+          "images": [
+            "https://cdn.mafrservices.com/pim-content/UAE/media/product/2202019/1726031405/2202019_main.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 44,
+      "name": "Apple iPhone 16 Pro Max",
+      "description": "Apple flagship smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Apple",
+      "rating": 4.8,
+      "reviews": 135,
+      "offers": [],
+      "variants": [
+        {
+          "id": "44-natural-titanium-256-gb",
+          "productId": 44,
+          "slug": "natural-titanium-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Natural Titanium"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 144900,
+          "originalPrice": 144900,
+          "stock": 4,
+          "images": [
+            "https://cdnbase.comfy.ua/media/catalog/product/i/p/iphone_16_pro_max_natural_titanium_pdp_image_position_1__ce-ww.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 45,
+      "name": "Apple iPhone 15",
+      "description": "Apple smartphone with a dynamic display.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Apple",
+      "rating": 4.5,
+      "reviews": 125,
+      "offers": [],
+      "variants": [
+        {
+          "id": "45-pink-128-gb",
+          "productId": 45,
+          "slug": "pink-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Pink"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 69900,
+          "originalPrice": 69900,
+          "stock": 9,
+          "images": [
+            "https://www.proshop.se/Images/1600x1200/3198772_dc3bc5506209.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 46,
+      "name": "Apple iPhone 15 Plus",
+      "description": "Apple smartphone with a large display.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Apple",
+      "rating": 4.4,
+      "reviews": 82,
+      "offers": [],
+      "variants": [
+        {
+          "id": "46-blue-128-gb",
+          "productId": 46,
+          "slug": "blue-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Blue"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 79900,
+          "originalPrice": 79900,
+          "stock": 7,
+          "images": [
+            "https://media.cdn.kaufland.de/product-images/original/f265252c4478a38e2c0126436d99ac6d.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 47,
+      "name": "Apple iPhone 15 Pro",
+      "description": "Apple premium smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Apple",
+      "rating": 4.6,
+      "reviews": 98,
+      "offers": [],
+      "variants": [
+        {
+          "id": "47-blue-titanium-128-gb",
+          "productId": 47,
+          "slug": "blue-titanium-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Blue Titanium"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 109900,
+          "originalPrice": 109900,
+          "stock": 4,
+          "images": [
+            "https://static.insales-cdn.com/images/products/1/2167/748759159/iphone-15-pro-finish-select-202309-6-1inch-bluetitanium.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 48,
+      "name": "Apple iPhone 15 Pro Max",
+      "description": "Apple flagship smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Apple",
+      "rating": 4.7,
+      "reviews": 117,
+      "offers": [],
+      "variants": [
+        {
+          "id": "48-black-titanium-256-gb",
+          "productId": 48,
+          "slug": "black-titanium-256-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Black Titanium"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "256 GB"
+            }
+          ],
+          "price": 134900,
+          "originalPrice": 134900,
+          "stock": 3,
+          "images": [
+            "https://mobileplanet.ua/uploads/product/2023-9-15/magazin-mobileplanet-apple-iphone-15-pro-max-1tb-dual-sim-black-titaniu-2861461.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 49,
+      "name": "Apple iPhone 14",
+      "description": "Apple smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Apple",
+      "rating": 4.3,
+      "reviews": 105,
+      "offers": [],
+      "variants": [
+        {
+          "id": "49-midnight-128-gb",
+          "productId": 49,
+          "slug": "midnight-128-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Midnight"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "128 GB"
+            }
+          ],
+          "price": 59900,
+          "originalPrice": 59900,
+          "stock": 10,
+          "images": [
+            "https://content1.rozetka.com.ua/goods/images/original/284913538.jpg"
+          ]
+        }
+      ],
+      "badge": null
+    },
+    {
+      "id": 50,
+      "name": "Apple iPhone SE (3rd generation)",
+      "description": "Compact Apple smartphone.",
+      "category": "Mobiles",
+      "subCategory": "Smartphones",
+      "brand": "Apple",
+      "rating": 4.1,
+      "reviews": 70,
+      "offers": [],
+      "variants": [
+        {
+          "id": "50-midnight-64-gb",
+          "productId": 50,
+          "slug": "midnight-64-gb",
+          "options": [
+            {
+              "type": "color",
+              "label": "Color",
+              "value": "Midnight"
+            },
+            {
+              "type": "storage",
+              "label": "Storage",
+              "value": "64 GB"
+            }
+          ],
+          "price": 49900,
+          "originalPrice": 49900,
+          "stock": 5,
+          "images": [
+            "https://owp.klarna.com/product/1280x1280/3220875460/Apple-iPhone-SE-128GB-%283rd-Generation%29-Midnight.jpg?ph=true"
+          ]
+        }
+      ],
+      "badge": null
+    }
   ]
 }
