@@ -35108,7 +35108,7 @@
       "id": "mobiles",
       "name": "Mobiles",
       "slug": "mobiles",
-      "icon": "📱",
+      "icon": "https://api.iconify.design/mdi/cellphone.svg",
       "description": "Smartphones, feature phones and accessories",
       "productCount": 125
     },
@@ -35116,7 +35116,7 @@
       "id": "fashion",
       "name": "Fashion",
       "slug": "fashion",
-      "icon": "👕",
+      "icon": "https://api.iconify.design/mdi/tshirt-crew.svg",
       "description": "Clothing, footwear and fashion accessories",
       "productCount": 125
     },
@@ -35124,7 +35124,7 @@
       "id": "electronics",
       "name": "Electronics",
       "slug": "electronics",
-      "icon": "💻",
+      "icon": "https://api.iconify.design/mdi/laptop.svg",
       "description": "Personal electronics and gadgets",
       "productCount": 125
     },
@@ -35132,7 +35132,7 @@
       "id": "home",
       "name": "Home",
       "slug": "home",
-      "icon": "🏠",
+      "icon": "https://api.iconify.design/mdi/home.svg",
       "description": "Furniture, decor and home essentials",
       "productCount": 125
     },
@@ -35140,7 +35140,7 @@
       "id": "beauty",
       "name": "Beauty",
       "slug": "beauty",
-      "icon": "✨",
+      "icon": "https://api.iconify.design/mdi/lipstick.svg",
       "description": "Skincare, haircare and personal care",
       "productCount": 125
     },
@@ -35148,7 +35148,7 @@
       "id": "appliances",
       "name": "Appliances",
       "slug": "appliances",
-      "icon": "🔌",
+      "icon": "https://api.iconify.design/mdi/washing-machine.svg",
       "description": "Kitchen and household appliances",
       "productCount": 125
     },
@@ -35156,7 +35156,7 @@
       "id": "sports-fitness",
       "name": "Sports & Fitness",
       "slug": "sports-fitness",
-      "icon": "🏃",
+      "icon": "https://api.iconify.design/mdi/dumbbell.svg",
       "description": "Sports equipment and fitness products",
       "productCount": 125
     },
@@ -35164,7 +35164,7 @@
       "id": "toys",
       "name": "Toys",
       "slug": "toys",
-      "icon": "🧸",
+      "icon": "https://api.iconify.design/mdi/teddy-bear.svg",
       "description": "Toys, games and creative play",
       "productCount": 125
     }
