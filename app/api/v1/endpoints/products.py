@@ -14,6 +14,10 @@ _catalog_path = Path(__file__).resolve().parents[3] / "data" / "products.json"
 with _catalog_path.open(encoding="utf-8") as catalog_file:
     _products = json.load(catalog_file)["products"]
 
+_details_path = Path(__file__).resolve().parents[3] / "data" / "product_details.json"
+with _details_path.open(encoding="utf-8") as details_file:
+    _product_details = json.load(details_file)["products"]
+
 
 @router.get("")
 def list_products(
@@ -33,7 +37,7 @@ def list_products(
 @router.get("/{product_id}", dependencies=[Depends(get_current_user)])
 def get_product(product_id: int) -> dict:
     """Return one product by its numeric ID."""
-    for product in _products:
+    for product in _product_details:
         if product["id"] == product_id:
             return product
     raise HTTPException(status_code=404, detail="Product not found")
