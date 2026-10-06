@@ -1,9 +1,7 @@
 import json
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-
-from ...deps import get_current_user
+from fastapi import APIRouter, HTTPException, Query
 
 router = APIRouter(
     prefix="/products",
@@ -34,7 +32,7 @@ def list_products(
     return {"count": len(result), "products": result}
 
 
-@router.get("/{product_id}", dependencies=[Depends(get_current_user)])
+@router.get("/{product_id}")
 def get_product(product_id: int) -> dict:
     """Return one product by its numeric ID."""
     for product in _product_details:
