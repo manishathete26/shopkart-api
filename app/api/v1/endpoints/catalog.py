@@ -24,19 +24,6 @@ def _get_deals() -> list[dict]:
     return deals
 
 
-@router.get("/categories")
-def list_categories() -> dict:
-    """Return the categories shown on the home page."""
-    return {"count": len(_categories), "categories": _categories}
-
-
-@router.get("/deals")
-def list_best_deals() -> dict:
-    """Return the curated best-deal products."""
-    deals = _get_deals()
-    return {"count": len(deals), "bestDeals": deals}
-
-
 @router.get("/home")
 def get_home_page(
     page: int = Query(default=1, ge=1),
