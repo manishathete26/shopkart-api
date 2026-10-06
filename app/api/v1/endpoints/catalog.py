@@ -1,5 +1,5 @@
 import json
-import random
+import math
 from pathlib import Path
 
 from fastapi import APIRouter, Query
@@ -38,28 +38,22 @@ def list_best_deals() -> dict:
 
 
 @router.get("/home")
-def get_home_page(products_per_category: int = Query(default=4, ge=1, le=20)) -> dict:
-    """Return categories, best deals, and random products for each category."""
+def get_home_page(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+) -> dict:
+    """Return all home-page content and a paginated product list in one response."""
     deals = _get_deals()
-    products_by_category = []
-    for category in _categories:
-        category_name = category["name"] if isinstance(category, dict) else category
-        matching_products = [
-            product
-            for product in _products
-            if product["category"].casefold() == category_name.casefold()
-        ]
-        products_by_category.append(
-            {
-                "category": category,
-                "products": random.sample(
-                    matching_products,
-                    min(products_per_category, len(matching_products)),
-                ),
-            }
-        )
+    start = (page - 1) * page_size
+    page_products = _products[start : start + page_size]
     return {
         "topCategories": _categories,
         "bestDeals": deals,
-        "productsByCategory": products_by_category,
+        "pagination": {
+            "page": page,
+            "pageSize": page_size,
+            "totalProducts": len(_products),
+            "totalPages": math.ceil(len(_products) / page_size),
+        },
+        "products": page_products,
     }
