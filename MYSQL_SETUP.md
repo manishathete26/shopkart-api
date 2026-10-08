@@ -20,9 +20,14 @@ DATABASE_URL=mysql+pymysql://shopkart_app:replace-with-a-strong-password@127.0.0
 Do not commit real database passwords. Add the URL to your local `.env` file or
 your hosting provider's environment variables. On startup, the API creates the
 SQLAlchemy tables and imports `app/data/products.json` when the products table
-is empty. Products, their variants, and wishlist items are stored in related
-tables. The wishlist product foreign key is added on existing MySQL/PostgreSQL
+is empty. Products and their variants are stored together in the `products`
+table; variants use a JSON column. Wishlist items remain in their own table and
+reference `products.id`. The wishlist product foreign key is added on existing MySQL/PostgreSQL
 databases when all existing wishlist product IDs match catalog products.
+
+When upgrading from the earlier two-table layout, startup copies old
+`product_variants` rows into `products.variants` and preserves the old table as
+a backup. Verify the copied variants before manually dropping the legacy table.
 
 After changing the JSON catalog, synchronize it to the database with:
 

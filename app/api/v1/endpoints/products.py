@@ -3,7 +3,7 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
 from ....db.session import get_db
 from ....models.product import Product
@@ -22,9 +22,7 @@ def list_products(
     db: Session = Depends(get_db),
 ) -> dict:
     """Return a paginated, optionally filtered product list."""
-    products = db.scalars(
-        select(Product).options(selectinload(Product.variants))
-    ).all()
+    products = db.scalars(select(Product)).all()
     result = [
         product
         for product in products
@@ -35,10 +33,10 @@ def list_products(
     if sort == "rating":
         result.sort(key=lambda product: product.rating or 0, reverse=True)
     elif sort == "price_asc":
-        result.sort(key=lambda product: min((v.price for v in product.variants), default=0))
+        result.sort(key=lambda product: min((v.get("price", 0) for v in product.variants), default=0))
     elif sort == "price_desc":
         result.sort(
-            key=lambda product: min((v.price for v in product.variants), default=0),
+            key=lambda product: min((v.get("price", 0) for v in product.variants), default=0),
             reverse=True,
         )
     else:
@@ -61,7 +59,6 @@ def get_product(product_id: int, db: Session = Depends(get_db)) -> dict:
     """Return one product by its numeric ID."""
     product = db.scalar(
         select(Product)
-        .options(selectinload(Product.variants))
         .where(Product.id == product_id)
     )
     if product is None:

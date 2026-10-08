@@ -60,9 +60,7 @@ def get_wishlist(
     """Return the authenticated user's wishlist with the current catalog details."""
     items = db.scalars(
         select(WishlistItem)
-        .options(
-            selectinload(WishlistItem.product).selectinload(Product.variants)
-        )
+        .options(selectinload(WishlistItem.product))
         .where(WishlistItem.user_id == current_user.id)
         .order_by(WishlistItem.id.desc())
     ).all()

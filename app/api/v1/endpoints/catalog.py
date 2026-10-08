@@ -4,7 +4,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
 from ....db.session import get_db
 from ....models.product import Product
@@ -22,9 +22,7 @@ with _catalog_path.open(encoding="utf-8") as catalog_file:
 def _get_deals(db: Session) -> list[dict]:
     deal_ids = [deal["productId"] for deal in _deal_entries]
     products = db.scalars(
-        select(Product)
-        .options(selectinload(Product.variants))
-        .where(Product.id.in_(deal_ids))
+        select(Product).where(Product.id.in_(deal_ids))
     ).all()
     products_by_id = {product.id: product for product in products}
     deals = []
@@ -43,7 +41,7 @@ def get_home_page(
 ) -> dict:
     """Return all home-page content and a paginated product list in one response."""
     products = db.scalars(
-        select(Product).options(selectinload(Product.variants)).order_by(Product.id)
+        select(Product).order_by(Product.id)
     ).all()
     deals = _get_deals(db)
     start = (page - 1) * page_size
