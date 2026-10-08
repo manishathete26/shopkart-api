@@ -1,4 +1,7 @@
 from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import Integer, inspect, text
@@ -6,13 +9,16 @@ from sqlalchemy import Integer, inspect, text
 from . import models
 from .api.v1.api import api_router
 from .db.base import Base
-from .db.session import engine
-
-load_dotenv()
+from .db.session import SessionLocal, engine, ensure_wishlist_product_foreign_key
+from .services.product_catalog import seed_product_catalog
 
 # Register all SQLAlchemy models before creating their tables.
 assert models is not None
 Base.metadata.create_all(bind=engine)
+
+with SessionLocal() as catalog_db:
+    seed_product_catalog(catalog_db)
+ensure_wishlist_product_foreign_key()
 
 
 def update_existing_user_columns() -> None:

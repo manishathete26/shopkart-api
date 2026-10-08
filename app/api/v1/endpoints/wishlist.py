@@ -1,23 +1,17 @@
-import json
-from pathlib import Path
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from ....api.deps import get_current_user
 from ....db.session import get_db
 from ....models.auth import User
+from ....models.product import Product
 from ....models.wishlist import WishlistItem
 from ....schemas.wishlist import WishlistAddRequest
+from ....services.product_catalog import product_to_dict
 
 router = APIRouter(prefix="/wishlist", tags=["wishlist"])
-
-_catalog_path = Path(__file__).resolve().parents[3] / "data" / "products.json"
-with _catalog_path.open(encoding="utf-8") as catalog_file:
-    _products = json.load(catalog_file)["products"]
-    _products_by_id = {product["id"]: product for product in _products}
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -27,7 +21,7 @@ def add_to_wishlist(
     db: Session = Depends(get_db),
 ) -> dict:
     """Add a catalog product to the authenticated user's wishlist."""
-    if payload.product_id not in _products_by_id:
+    if db.get(Product, payload.product_id) is None:
         raise HTTPException(status_code=404, detail="Product not found")
 
     existing = db.scalar(
@@ -66,6 +60,9 @@ def get_wishlist(
     """Return the authenticated user's wishlist with the current catalog details."""
     items = db.scalars(
         select(WishlistItem)
+        .options(
+            selectinload(WishlistItem.product).selectinload(Product.variants)
+        )
         .where(WishlistItem.user_id == current_user.id)
         .order_by(WishlistItem.id.desc())
     ).all()
@@ -76,7 +73,9 @@ def get_wishlist(
             {
                 "wishlist_item_id": item.id,
                 "product_id": item.product_id,
-                "product": _products_by_id.get(item.product_id),
+                "product": (
+                    product_to_dict(item.product) if item.product is not None else None
+                ),
             }
             for item in items
         ],

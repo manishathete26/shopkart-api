@@ -1,16 +1,15 @@
-import json
 import math
-from pathlib import Path
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
+from sqlalchemy.orm import Session, selectinload
+
+from ....db.session import get_db
+from ....models.product import Product
+from ....services.product_catalog import product_to_dict
 
 router = APIRouter(prefix="/products", tags=["products"])
-
-_catalog_path = Path(__file__).resolve().parents[3] / "data" / "products.json"
-with _catalog_path.open(encoding="utf-8") as catalog_file:
-    _catalog = json.load(catalog_file)
-    _products = _catalog["products"]
 
 
 @router.get("")
@@ -20,27 +19,34 @@ def list_products(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     sort: Literal["popularity", "rating", "price_asc", "price_desc"] = "popularity",
+    db: Session = Depends(get_db),
 ) -> dict:
     """Return a paginated, optionally filtered product list."""
+    products = db.scalars(
+        select(Product).options(selectinload(Product.variants))
+    ).all()
     result = [
         product
-        for product in _products
-        if (category is None or product["category"].casefold() == category.casefold())
-        and (brand is None or product["brand"].casefold() == brand.casefold())
+        for product in products
+        if (category is None or product.category.casefold() == category.casefold())
+        and (brand is None or (product.brand or "").casefold() == brand.casefold())
     ]
 
     if sort == "rating":
-        result.sort(key=lambda product: product["rating"], reverse=True)
+        result.sort(key=lambda product: product.rating or 0, reverse=True)
     elif sort == "price_asc":
-        result.sort(key=lambda product: product["variants"][0]["price"])
+        result.sort(key=lambda product: min((v.price for v in product.variants), default=0))
     elif sort == "price_desc":
-        result.sort(key=lambda product: product["variants"][0]["price"], reverse=True)
+        result.sort(
+            key=lambda product: min((v.price for v in product.variants), default=0),
+            reverse=True,
+        )
     else:
-        result.sort(key=lambda product: product["reviews"], reverse=True)
+        result.sort(key=lambda product: product.reviews, reverse=True)
 
     total = len(result)
     start = (page - 1) * page_size
-    page_products = result[start : start + page_size]
+    page_products = [product_to_dict(p) for p in result[start : start + page_size]]
     return {
         "count": total,
         "page": page,
@@ -51,9 +57,13 @@ def list_products(
 
 
 @router.get("/{product_id}")
-def get_product(product_id: int) -> dict:
+def get_product(product_id: int, db: Session = Depends(get_db)) -> dict:
     """Return one product by its numeric ID."""
-    for product in _products:
-        if product["id"] == product_id:
-            return product
-    raise HTTPException(status_code=404, detail="Product not found")
+    product = db.scalar(
+        select(Product)
+        .options(selectinload(Product.variants))
+        .where(Product.id == product_id)
+    )
+    if product is None:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product_to_dict(product)
