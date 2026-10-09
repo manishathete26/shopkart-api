@@ -73,6 +73,24 @@ def ensure_wishlist_product_foreign_key() -> None:
         """))
 
 
+def ensure_wishlist_variant_column() -> None:
+    """Add variant_id to wishlist rows created by older application versions."""
+    inspector = inspect(engine)
+    if "wishlist_items" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("wishlist_items")}
+    if "variant_id" in columns:
+        return
+
+    # Nullable keeps existing wishlist entries valid because their former
+    # product-only records did not retain a selected variant.
+    with engine.begin() as connection:
+        connection.execute(text(
+            "ALTER TABLE wishlist_items ADD COLUMN variant_id VARCHAR(255) NULL"
+        ))
+
+
 def get_db():
     db = SessionLocal()
     try:

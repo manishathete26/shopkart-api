@@ -55,7 +55,8 @@ def cart_response(db: Session, user_id: int) -> dict:
             "product_id": product.id,
             "product_name": product.name,
             "variant_id": item.variant_id,
-            "variant": variant,
+            # Include the selected quantity with the full selected variant details.
+            "variant": {**variant, "quantity": item.quantity},
             "quantity": item.quantity,
             "unit_price": unit_price,
             "line_total": line_total,

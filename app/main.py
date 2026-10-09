@@ -9,7 +9,12 @@ from sqlalchemy import Integer, inspect, text
 from . import models
 from .api.v1.api import api_router
 from .db.base import Base
-from .db.session import SessionLocal, engine, ensure_wishlist_product_foreign_key
+from .db.session import (
+    SessionLocal,
+    engine,
+    ensure_wishlist_product_foreign_key,
+    ensure_wishlist_variant_column,
+)
 from .services.product_catalog import migrate_legacy_variants, seed_product_catalog
 
 # Register all SQLAlchemy models before creating their tables.
@@ -20,6 +25,7 @@ migrate_legacy_variants(engine)
 with SessionLocal() as catalog_db:
     seed_product_catalog(catalog_db)
 ensure_wishlist_product_foreign_key()
+ensure_wishlist_variant_column()
 
 
 def update_existing_user_columns() -> None:

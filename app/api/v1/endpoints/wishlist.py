@@ -14,6 +14,13 @@ from ....services.product_catalog import product_to_dict
 router = APIRouter(prefix="/wishlist", tags=["wishlist"])
 
 
+def find_variant(product: Product, variant_id: str) -> dict:
+    for variant in product.variants or []:
+        if str(variant.get("variantid", "")) == variant_id:
+            return variant
+    raise HTTPException(status_code=404, detail="Product variant not found")
+
+
 @router.post("", status_code=status.HTTP_201_CREATED)
 def add_to_wishlist(
     payload: WishlistAddRequest,
@@ -21,8 +28,10 @@ def add_to_wishlist(
     db: Session = Depends(get_db),
 ) -> dict:
     """Add a catalog product to the authenticated user's wishlist."""
-    if db.get(Product, payload.product_id) is None:
+    product = db.get(Product, payload.product_id)
+    if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
+    find_variant(product, payload.variant_id)
 
     existing = db.scalar(
         select(WishlistItem).where(
@@ -33,7 +42,11 @@ def add_to_wishlist(
     if existing:
         raise HTTPException(status_code=409, detail="Product is already in your wishlist")
 
-    item = WishlistItem(user_id=current_user.id, product_id=payload.product_id)
+    item = WishlistItem(
+        user_id=current_user.id,
+        product_id=payload.product_id,
+        variant_id=payload.variant_id,
+    )
     db.add(item)
     try:
         db.commit()
@@ -49,6 +62,7 @@ def add_to_wishlist(
         "message": "Product added to wishlist",
         "wishlist_item_id": item.id,
         "product_id": item.product_id,
+        "variant_id": item.variant_id,
     }
 
 
@@ -71,6 +85,12 @@ def get_wishlist(
             {
                 "wishlist_item_id": item.id,
                 "product_id": item.product_id,
+                "variant_id": item.variant_id,
+                "variant": (
+                    find_variant(item.product, item.variant_id)
+                    if item.product is not None and item.variant_id is not None
+                    else None
+                ),
                 "product": (
                     product_to_dict(item.product) if item.product is not None else None
                 ),
