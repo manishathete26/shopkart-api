@@ -85,7 +85,7 @@ def add_cart_item(
     db: Session = Depends(get_db),
 ) -> dict:
     """Add a product variant, increasing its quantity if already in the cart."""
-    product = db.get(Product, payload.product_id)
+    product = db.get(Product, payload.parent_id)
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
 
@@ -93,7 +93,7 @@ def add_cart_item(
     existing = db.scalar(
         select(CartItem).where(
             CartItem.user_id == current_user.id,
-            CartItem.product_id == payload.product_id,
+            CartItem.product_id == payload.parent_id,
             CartItem.variant_id == payload.variant_id,
         )
     )
@@ -107,7 +107,7 @@ def add_cart_item(
     else:
         item = CartItem(
             user_id=current_user.id,
-            product_id=payload.product_id,
+            product_id=payload.parent_id,
             variant_id=payload.variant_id,
             quantity=payload.quantity,
         )

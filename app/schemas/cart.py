@@ -1,8 +1,12 @@
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 
 class CartItemCreate(BaseModel):
-    product_id: int = Field(gt=0)
+    parent_id: int = Field(
+        gt=0,
+        validation_alias=AliasChoices("parentId", "parent_id"),
+        serialization_alias="parentId",
+    )
     variant_id: str = Field(min_length=1, max_length=255)
     quantity: int = Field(default=1, ge=1, le=99)
 
