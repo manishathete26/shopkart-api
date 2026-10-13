@@ -22,6 +22,24 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    return _user_from_credentials(credentials, db)
+
+
+def get_optional_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Return the authenticated user when a valid bearer token is provided."""
+    if credentials is None:
+        return None
+
+    return _user_from_credentials(credentials, db)
+
+
+def _user_from_credentials(
+    credentials: HTTPAuthorizationCredentials,
+    db: Session,
+) -> User:
     token = credentials.credentials
 
     try:
