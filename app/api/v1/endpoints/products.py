@@ -5,11 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ....api.deps import get_optional_current_user
 from ....db.session import get_db
-from ....models.auth import User
 from ....models.product import Product
-from ....models.wishlist import WishlistItem
 from ....services.product_catalog import product_to_dict
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -89,40 +86,12 @@ def list_products(
 
 
 @router.get("/{product_id}")
-def get_product(
-    product_id: int,
-    current_user: User | None = Depends(get_optional_current_user),
-    db: Session = Depends(get_db),
-) -> dict:
-    """Return one product and mark variants saved by the optional authenticated user."""
+def get_product(product_id: int, db: Session = Depends(get_db)) -> dict:
+    """Return one product by its numeric ID."""
     product = db.scalar(
         select(Product)
         .where(Product.id == product_id)
     )
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
-
-    wishlisted_variant_ids: set[str] = set()
-    if current_user is not None:
-        wishlisted_variant_ids = {
-            variant_id
-            for variant_id in db.scalars(
-                select(WishlistItem.variant_id).where(
-                    WishlistItem.user_id == current_user.id,
-                    WishlistItem.product_id == product_id,
-                )
-            ).all()
-            if variant_id is not None
-        }
-
-    result = product_to_dict(product)
-    result["variants"] = [
-        {
-            **variant,
-            "isWishlisted": (
-                str(variant.get("variantid", "")) in wishlisted_variant_ids
-            ),
-        }
-        for variant in result["variants"]
-    ]
-    return result
+    return product_to_dict(product)
