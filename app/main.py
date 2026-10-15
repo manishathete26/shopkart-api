@@ -4,7 +4,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import Integer, inspect, text
+from sqlalchemy import Integer, inspect, select, text
 
 from . import models
 from .api.v1.api import api_router
@@ -15,6 +15,8 @@ from .db.session import (
     ensure_wishlist_product_foreign_key,
     ensure_wishlist_variant_column,
 )
+from .models.address import Address
+from .models.auth import User
 from .services.product_catalog import migrate_legacy_variants, seed_product_catalog
 
 # Register all SQLAlchemy models before creating their tables.
@@ -83,6 +85,35 @@ def update_existing_user_columns() -> None:
 
 
 update_existing_user_columns()
+
+
+def migrate_legacy_user_addresses() -> None:
+    """Copy existing registration addresses into the dedicated addresses table."""
+    with SessionLocal() as db:
+        users = db.scalars(
+            select(User).where(User.address.is_not(None), User.address != "")
+        ).all()
+        for user in users:
+            existing = db.scalar(
+                select(Address.id).where(
+                    Address.user_id == user.id,
+                    Address.address == user.address,
+                    Address.pin == user.pin,
+                )
+            )
+            if existing is None:
+                db.add(
+                    Address(
+                        user_id=user.id,
+                        label="Home",
+                        address=user.address,
+                        pin=user.pin,
+                    )
+                )
+        db.commit()
+
+
+migrate_legacy_user_addresses()
 
 app = FastAPI(title="ShopKart Authentication API", version="1.0.0")
 app.add_middleware(

@@ -21,6 +21,7 @@ from ....core.security import (
     utc_now,
 )
 from ....db.session import get_db
+from ....models.address import Address
 from ....models.auth import OTPCode, RefreshSession, User
 from ....schemas.auth import (
     CreateProfileRequest,
@@ -69,6 +70,15 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     )
     db.add(user)
     try:
+        db.flush()
+        db.add(
+            Address(
+                user_id=user.id,
+                label="Home",
+                address=payload.address.strip(),
+                pin=payload.pin.strip(),
+            )
+        )
         db.commit()
     except IntegrityError as error:
         db.rollback()
