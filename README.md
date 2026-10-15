@@ -12,6 +12,7 @@ flowchart LR
     Routes --> Catalog[Catalog and product routes]
     Routes --> Cart[Cart routes]
     Routes --> Wishlist[Wishlist routes]
+    Routes --> Orders[Order placement and history routes]
 
     Auth --> Security[JWT, password, and OTP helpers]
     Auth --> Mail[Email service\nSMTP via FastMail]
@@ -19,6 +20,7 @@ flowchart LR
     Catalog --> DBSession
     Cart --> DBSession
     Wishlist --> DBSession
+    Orders --> DBSession
     DBSession --> ORM[SQLAlchemy models]
     ORM --> Database[(SQLite / PostgreSQL / MySQL)]
 
@@ -35,7 +37,7 @@ flowchart LR
 | Area | Responsibility |
 | --- | --- |
 | `app/main.py` | Loads configuration, creates tables, runs catalog migrations/seeding, configures CORS, and mounts the API router. |
-| `app/api/v1/endpoints/` | HTTP endpoints for auth, catalog, products, cart, and wishlist operations. |
+| `app/api/v1/endpoints/` | HTTP endpoints for auth, catalog, products, cart, wishlist, and order operations. |
 | `app/api/deps.py` | Shared authentication dependencies, including the current-user dependency. |
 | `app/schemas/` | Pydantic request and response schemas. |
 | `app/models/` | SQLAlchemy table models. |
@@ -45,7 +47,7 @@ flowchart LR
 
 ## Database tables and relationships
 
-The diagram below documents the six SQLAlchemy tables currently declared by the application. `users` and `products` are parent tables; cart and wishlist rows link users to products. Product variants are embedded as JSON in `products.variants`, so they are not a separate current table.
+The diagram below documents the eight SQLAlchemy tables currently declared by the application. `users` and `products` are parent tables; cart and wishlist rows link users to products. Orders belong to users and contain item snapshots. Product variants are embedded as JSON in `products.variants`, so they are not a separate current table.
 
 ```mermaid
 erDiagram
@@ -54,6 +56,9 @@ erDiagram
     USERS ||--o{ WISHLIST_ITEMS : owns
     PRODUCTS ||--o{ WISHLIST_ITEMS : appears_in
     USERS ||--o{ REFRESH_SESSIONS : has
+    USERS ||--o{ ORDERS : places
+    ORDERS ||--|{ ORDER_ITEMS : contains
+    PRODUCTS o|--o{ ORDER_ITEMS : referenced_by
 
     USERS {
         int id PK
@@ -81,6 +86,26 @@ erDiagram
         string token_id UK
         datetime expires_at
         boolean is_revoked
+    }
+    ORDERS {
+        int id PK
+        int user_id FK
+        string status
+        decimal total_amount
+        string shipping_address "nullable snapshot"
+        string shipping_pin "nullable snapshot"
+        datetime created_at
+    }
+    ORDER_ITEMS {
+        int id PK
+        int order_id FK
+        int product_id FK "nullable"
+        string product_name "snapshot"
+        string variant_id
+        json variant_snapshot
+        decimal unit_price
+        int quantity
+        decimal line_total
     }
     PRODUCTS {
         int id PK
@@ -121,11 +146,21 @@ erDiagram
 | `users` | `wishlist_items` | One user to many wishlist rows | `wishlist_items.user_id → users.id`; no delete cascade is declared on this FK. |
 | `products` | `wishlist_items` | One product to many wishlist rows | `wishlist_items.product_id → products.id`; deleting a product cascades to its wishlist rows. |
 | `users` | `refresh_sessions` | One user to many refresh sessions | `refresh_sessions.user_id → users.id`; no delete cascade is declared on this FK. |
+| `users` | `orders` | One user to many orders | `orders.user_id → users.id`; order history is scoped to the authenticated user. |
+| `orders` | `order_items` | One order to one or more line items | `order_items.order_id → orders.id`; deleting an order cascades to its items. |
+| `products` | `order_items` | One product may be referenced by many order items | Nullable `order_items.product_id → products.id` with `ON DELETE SET NULL`; order item names, variant, and prices are snapshots. |
 | — | `otp_codes` | No relational FK | OTP records are looked up by email; the schema does not link them to `users.id`. |
 
 `cart_items` enforces one row per `(user_id, product_id, variant_id)`. `wishlist_items` enforces one row per `(user_id, product_id)`; its `variant_id` is optional metadata and does not change that uniqueness rule. Both `cart_items` and `wishlist_items` contain foreign keys to `users` and `products`, although only the product model declares an ORM relationship property.
 
 ### Product variants and legacy data
+
+The `POST /orders` endpoint validates the authenticated user's delivery address and PIN, cart contents, selected variants, stock limits, and total before saving an order, decrementing the purchased stock, and clearing the cart in one transaction. `GET /orders` returns only that user's orders, newest first, with item snapshots and pagination (`page`, `pageSize`, maximum 100). It also accepts one date filter at a time:
+
+- `duration=3_months`, `duration=6_months`, or `duration=1_year` for a rolling window ending now (UTC).
+- `year=2025` for orders placed during that calendar year (UTC).
+
+For example: `GET /orders?page=1&pageSize=20&duration=6_months` or `GET /orders?year=2025`. Supplying both `duration` and `year` returns HTTP 422. The total count and page count are calculated after applying the selected filter. Both endpoints require a valid access token in the `Authorization: Bearer <token>` header.
 
 Current product variant data (including variant IDs, price, stock, and images) is stored inside the `products.variants` JSON column. The startup migration contains compatibility logic for a legacy `product_variants` table and copies its contents into that JSON column when appropriate. `product_variants` is not declared as a current SQLAlchemy model and is not part of the current entity relationship diagram.
 

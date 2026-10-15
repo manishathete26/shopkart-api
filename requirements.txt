@@ -17,6 +17,7 @@ email-validator==2.3.0
 executing==2.3.0
 fastapi==0.143.0
 fastapi-mail==1.6.8
+httpx2==2.13.0
 h11==0.16.0
 httpcore==1.0.9
 httptools==0.9.0
