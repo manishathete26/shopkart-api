@@ -1,7 +1,7 @@
 import os
 
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-os.environ.setdefault("SECRET_KEY", "test-secret")
+os.environ.setdefault("SECRET_KEY", "shopkart-test-secret-key-at-least-32-bytes-long")
 os.environ["MAIL_USERNAME"] = ""
 os.environ["MAIL_PASSWORD"] = ""
 os.environ["MAIL_FROM"] = ""
@@ -11,9 +11,12 @@ import unittest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.db.session import engine
 
 
 EXPECTED_AUTH_OPERATIONS = (
+    ("post", "/auth/register", "register_auth_register_post"),
+    ("post", "/auth/login", "login_auth_login_post"),
     ("post", "/auth/send-otp", "send_otp_auth_send_otp_post"),
     ("post", "/auth/verify-otp", "verify_otp_auth_verify_otp_post"),
     ("post", "/auth/create-profile", "create_profile_auth_create_profile_post"),
@@ -27,6 +30,11 @@ class AuthStructureTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.client = TestClient(app)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.close()
+        engine.dispose()
 
     def test_app_metadata(self):
         self.assertEqual(app.title, "ShopKart Authentication API")
