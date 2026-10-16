@@ -228,9 +228,10 @@ class OrderApiTest(unittest.TestCase):
         self.add_order(self.user_id, now - timedelta(days=430), 4)
 
         expected_counts = {
-            "3_months": 1,
-            "6_months": 2,
-            "1_year": 3,
+            2: 1,
+            3: 1,
+            6: 2,
+            12: 3,
         }
         for duration, expected_count in expected_counts.items():
             with self.subTest(duration=duration):
@@ -268,7 +269,7 @@ class OrderApiTest(unittest.TestCase):
         self.assertEqual(response.json()["count"], 2)
 
         conflict = self.client.get(
-            "/orders?year=2025&duration=6_months",
+            "/orders?year=2025&duration=6",
             headers=self.headers,
         )
         self.assertEqual(conflict.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
@@ -282,13 +283,18 @@ class OrderApiTest(unittest.TestCase):
             "/orders?pageSize=101",
             headers=self.headers,
         )
-        invalid_duration = self.client.get(
-            "/orders?duration=2_months",
+        invalid_duration_below_minimum = self.client.get(
+            "/orders?duration=0",
+            headers=self.headers,
+        )
+        invalid_duration_above_maximum = self.client.get(
+            "/orders?duration=37",
             headers=self.headers,
         )
         self.assertEqual(invalid_page.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
         self.assertEqual(invalid_page_size.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
-        self.assertEqual(invalid_duration.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
+        self.assertEqual(invalid_duration_below_minimum.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
+        self.assertEqual(invalid_duration_above_maximum.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
 
 
 if __name__ == "__main__":
