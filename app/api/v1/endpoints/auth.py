@@ -28,6 +28,7 @@ from ....schemas.auth import (
     EmailRequest,
     LoginRequest,
     LogoutRequest,
+    RegisterAddress,
     RefreshTokenRequest,
     RegisterRequest,
     SendOTPResponse,
@@ -59,12 +60,21 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
             detail="An account with this email already exists",
         )
 
+    if isinstance(payload.address, RegisterAddress):
+        street = payload.address.street.strip()
+        city = payload.address.city.strip()
+        state = payload.address.state.strip()
+        address_text = ", ".join((street, city, state))
+    else:
+        address_text = payload.address.strip()
+        street = city = state = None
+
     user = User(
         email=email,
         full_name=payload.full_name.strip(),
         password_hash=password_context.hash(payload.password),
         gender=payload.gender,
-        address=payload.address.strip(),
+        address=address_text,
         pin=payload.pin.strip(),
         profile_completed=True,
     )
@@ -75,7 +85,10 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
             Address(
                 user_id=user.id,
                 label="Home",
-                address=payload.address.strip(),
+                address=address_text,
+                street=street,
+                city=city,
+                state=state,
                 pin=payload.pin.strip(),
             )
         )

@@ -15,6 +15,9 @@ class Address(Base):
     )
     label: Mapped[str | None] = mapped_column(String(50), nullable=True)
     address: Mapped[str] = mapped_column(String(500), nullable=False)
+    street: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    state: Mapped[str | None] = mapped_column(String(120), nullable=True)
     pin: Mapped[str | None] = mapped_column(String(12), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -1,4 +1,12 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+
+class RegisterAddress(BaseModel):
+    street: str = Field(min_length=2, max_length=255)
+    city: str = Field(min_length=2, max_length=120)
+    state: str = Field(min_length=2, max_length=120)
+
+    model_config = ConfigDict(str_strip_whitespace=True)
 
 
 class EmailRequest(BaseModel):
@@ -15,8 +23,18 @@ class RegisterRequest(BaseModel):
         le=2,
         description="0=male, 1=female, 2=others",
     )
-    address: str = Field(min_length=5, max_length=500)
+    # Keep accepting the former string form while supporting structured addresses.
+    address: RegisterAddress | str
     pin: str = Field(pattern=r"^\d{6}$")
+
+    @field_validator("address", mode="before")
+    @classmethod
+    def validate_legacy_address(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+            if len(value) < 5:
+                raise ValueError("Address must contain at least 5 characters")
+        return value
 
     @field_validator("gender", mode="before")
     @classmethod

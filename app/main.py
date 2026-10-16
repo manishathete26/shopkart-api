@@ -87,6 +87,33 @@ def update_existing_user_columns() -> None:
 update_existing_user_columns()
 
 
+def update_existing_address_columns() -> None:
+    """Add structured address fields to installations with the older table shape."""
+    inspector = inspect(engine)
+    if "addresses" not in inspector.get_table_names():
+        return
+
+    existing_columns = {
+        column["name"] for column in inspector.get_columns("addresses")
+    }
+    new_columns = {
+        "street": "VARCHAR(255)",
+        "city": "VARCHAR(120)",
+        "state": "VARCHAR(120)",
+    }
+    with engine.begin() as connection:
+        for column_name, column_type in new_columns.items():
+            if column_name not in existing_columns:
+                connection.execute(
+                    text(
+                        f"ALTER TABLE addresses ADD COLUMN {column_name} {column_type}"
+                    )
+                )
+
+
+update_existing_address_columns()
+
+
 def migrate_legacy_user_addresses() -> None:
     """Copy existing registration addresses into the dedicated addresses table."""
     with SessionLocal() as db:

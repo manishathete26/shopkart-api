@@ -30,9 +30,20 @@ def create_address(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Address:
+    street = payload.street.strip() if payload.street else None
+    city = payload.city.strip() if payload.city else None
+    state = payload.state.strip() if payload.state else None
+    address_text = (
+        payload.address.strip()
+        if payload.address
+        else ", ".join((street, city, state))
+    )
     address = Address(
         user_id=current_user.id,
-        address=payload.address.strip(),
+        address=address_text,
+        street=street,
+        city=city,
+        state=state,
         pin=payload.pin.strip() if payload.pin else None,
         label=payload.label.strip() if payload.label else None,
     )
@@ -64,7 +75,25 @@ def update_address(
     if "address" in updates and updates["address"] is None:
         raise HTTPException(status_code=422, detail="Address cannot be null")
 
+    structured_fields = ("street", "city", "state")
+    if any(field in updates for field in structured_fields):
+        street = updates.get("street", address.street)
+        city = updates.get("city", address.city)
+        state = updates.get("state", address.state)
+        if street is None or city is None or state is None:
+            raise HTTPException(
+                status_code=422,
+                detail="Structured addresses require street, city, and state",
+            )
+        address.address = ", ".join((street, city, state))
+    elif "address" in updates:
+        address.street = None
+        address.city = None
+        address.state = None
+
     for field, value in updates.items():
+        if field == "address" and any(part in updates for part in structured_fields):
+            continue
         setattr(address, field, value.strip() if isinstance(value, str) else value)
 
     db.commit()
