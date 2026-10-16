@@ -1,5 +1,5 @@
 import jwt
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import InvalidTokenError
 from sqlalchemy.orm import Session
@@ -17,7 +17,7 @@ def get_current_user(
 ) -> User:
     if credentials is None:
         raise HTTPException(
-            status_code=401,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -32,7 +32,7 @@ def get_current_user(
         user_id = int(claims["sub"])
     except (InvalidTokenError, KeyError, ValueError):
         raise HTTPException(
-            status_code=401,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid access token",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -40,7 +40,7 @@ def get_current_user(
     user = db.get(User, user_id)
     if not user or not user.is_active:
         raise HTTPException(
-            status_code=401,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid access token",
             headers={"WWW-Authenticate": "Bearer"},
         )

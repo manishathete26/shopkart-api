@@ -1,6 +1,6 @@
 import os
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from fastapi_mail import ConnectionConfig
 
 
@@ -16,7 +16,7 @@ def get_mail_config() -> ConnectionConfig:
 
     if not all((username, password, from_email, server, port_value)):
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Email service is not configured.",
         )
 
@@ -24,7 +24,7 @@ def get_mail_config() -> ConnectionConfig:
         mail_port = int(port_value)
     except ValueError as error:
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Email service is not configured.",
         ) from error
 
