@@ -18,7 +18,7 @@ def find_variant(product: Product, variant_id: str) -> dict:
     for variant in product.variants or []:
         if str(variant.get("variantid", "")) == variant_id:
             return variant
-    raise HTTPException(status_code=404, detail="Product variant not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product variant not found")
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -30,7 +30,7 @@ def add_to_wishlist(
     """Add a catalog product to the authenticated user's wishlist."""
     product = db.get(Product, payload.product_id)
     if product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     find_variant(product, payload.variant_id)
 
     existing = db.scalar(
@@ -40,7 +40,7 @@ def add_to_wishlist(
         )
     )
     if existing:
-        raise HTTPException(status_code=409, detail="Product is already in your wishlist")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Product is already in your wishlist")
 
     item = WishlistItem(
         user_id=current_user.id,
@@ -53,7 +53,7 @@ def add_to_wishlist(
     except IntegrityError as error:
         db.rollback()
         raise HTTPException(
-            status_code=409,
+            status_code=status.HTTP_409_CONFLICT,
             detail="Product is already in your wishlist",
         ) from error
 
@@ -114,7 +114,7 @@ def remove_from_wishlist(
         )
     )
     if item is None:
-        raise HTTPException(status_code=404, detail="Wishlist item not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Wishlist item not found")
 
     db.delete(item)
     db.commit()

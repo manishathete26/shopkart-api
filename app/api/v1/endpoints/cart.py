@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -19,7 +19,7 @@ def find_variant(product: Product, variant_id: str) -> dict:
     for variant in product.variants or []:
         if str(variant.get("variantid", "")) == variant_id:
             return variant
-    raise HTTPException(status_code=404, detail="Product variant not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product variant not found")
 
 
 def get_variant_price_and_stock(product: Product, variant_id: str) -> tuple[dict, Decimal, int]:
@@ -28,9 +28,9 @@ def get_variant_price_and_stock(product: Product, variant_id: str) -> tuple[dict
         price = Decimal(str(variant["price"]))
         stock = int(variant.get("stock", 0))
     except (KeyError, TypeError, ValueError):
-        raise HTTPException(status_code=409, detail="Product variant has invalid price or stock")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Product variant has invalid price or stock")
     if not price.is_finite() or price < 0 or stock < 0:
-        raise HTTPException(status_code=409, detail="Product variant has invalid price or stock")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Product variant has invalid price or stock")
     return variant, price, stock
 
 
@@ -78,7 +78,7 @@ def get_cart(
     return cart_response(db, current_user.id)
 
 
-@router.post("/items", status_code=201)
+@router.post("/items", status_code=status.HTTP_201_CREATED)
 def add_cart_item(
     payload: CartItemCreate,
     current_user: User = Depends(get_current_user),
@@ -87,7 +87,7 @@ def add_cart_item(
     """Add a product variant, increasing its quantity if already in the cart."""
     product = db.get(Product, payload.parent_id)
     if product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
     _, _, stock = get_variant_price_and_stock(product, payload.variant_id)
     existing = db.scalar(
@@ -99,7 +99,7 @@ def add_cart_item(
     )
     new_quantity = payload.quantity + (existing.quantity if existing else 0)
     if stock == 0 or new_quantity > stock:
-        raise HTTPException(status_code=409, detail="Requested quantity is not available in stock")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Requested quantity is not available in stock")
 
     if existing:
         existing.quantity = new_quantity
@@ -117,7 +117,7 @@ def add_cart_item(
         db.commit()
     except IntegrityError as error:
         db.rollback()
-        raise HTTPException(status_code=409, detail="Cart item could not be added") from error
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cart item could not be added") from error
     db.refresh(item)
     return {"message": "Item added to cart", "item_id": item.id, **cart_response(db, current_user.id)}
 
@@ -137,14 +137,14 @@ def update_cart_item(
         )
     )
     if item is None:
-        raise HTTPException(status_code=404, detail="Cart item not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cart item not found")
 
     product = db.get(Product, item.product_id)
     if product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     _, _, stock = get_variant_price_and_stock(product, item.variant_id)
     if payload.quantity > stock:
-        raise HTTPException(status_code=409, detail="Requested quantity is not available in stock")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Requested quantity is not available in stock")
 
     item.quantity = payload.quantity
     db.commit()
@@ -165,7 +165,7 @@ def remove_cart_item(
         )
     )
     if item is None:
-        raise HTTPException(status_code=404, detail="Cart item not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cart item not found")
 
     db.delete(item)
     db.commit()

@@ -8,6 +8,7 @@ os.environ["MAIL_FROM"] = ""
 
 import unittest
 
+from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -43,7 +44,7 @@ class AuthStructureTest(unittest.TestCase):
     def test_openapi_auth_operations(self):
         response = self.client.get("/openapi.json")
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         document = response.json()
         self.assertEqual(document["info"]["title"], "ShopKart Authentication API")
         self.assertEqual(document["info"]["version"], "1.0.0")
@@ -60,22 +61,22 @@ class AuthStructureTest(unittest.TestCase):
 
     def test_safe_auth_error_paths(self):
         cases = (
-            ("GET", "/auth/me", None, None, 401, "Not authenticated"),
+            ("GET", "/auth/me", None, None, status.HTTP_401_UNAUTHORIZED, "Not authenticated"),
             (
                 "GET",
                 "/auth/me",
                 None,
                 {"Authorization": "Bearer invalid"},
-                401,
+                status.HTTP_401_UNAUTHORIZED,
                 "Invalid access token",
             ),
-            ("POST", "/auth/verify-otp", {}, None, 422, None),
+            ("POST", "/auth/verify-otp", {}, None, status.HTTP_422_UNPROCESSABLE_CONTENT, None),
             (
                 "POST",
                 "/auth/refresh",
                 {"refresh_token": "invalid"},
                 None,
-                401,
+                status.HTTP_401_UNAUTHORIZED,
                 "Invalid refresh token",
             ),
             (
@@ -83,7 +84,7 @@ class AuthStructureTest(unittest.TestCase):
                 "/auth/logout",
                 {"refresh_token": "invalid"},
                 None,
-                400,
+                status.HTTP_400_BAD_REQUEST,
                 "Invalid refresh token",
             ),
             (
@@ -91,7 +92,7 @@ class AuthStructureTest(unittest.TestCase):
                 "/auth/send-otp",
                 {"email": "user@example.com"},
                 None,
-                500,
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "Email service is not configured.",
             ),
         )

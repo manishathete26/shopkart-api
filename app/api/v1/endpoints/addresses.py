@@ -67,13 +67,13 @@ def update_address(
         )
     )
     if address is None:
-        raise HTTPException(status_code=404, detail="Address not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address not found")
 
     updates = payload.model_dump(exclude_unset=True)
     if not updates:
-        raise HTTPException(status_code=400, detail="No address fields provided")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No address fields provided")
     if "address" in updates and updates["address"] is None:
-        raise HTTPException(status_code=422, detail="Address cannot be null")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Address cannot be null")
 
     structured_fields = ("street", "city", "state")
     if any(field in updates for field in structured_fields):
@@ -82,7 +82,7 @@ def update_address(
         state = updates.get("state", address.state)
         if street is None or city is None or state is None:
             raise HTTPException(
-                status_code=422,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Structured addresses require street, city, and state",
             )
         address.address = ", ".join((street, city, state))
@@ -114,7 +114,7 @@ def delete_address(
         )
     )
     if address is None:
-        raise HTTPException(status_code=404, detail="Address not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address not found")
 
     db.delete(address)
     db.commit()

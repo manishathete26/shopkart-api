@@ -3,7 +3,7 @@ import re
 from calendar import monthrange
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
-from typing import Any, Literal
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
@@ -20,13 +20,6 @@ from ....schemas.order import OrderHistoryRead, OrderRead
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 MAX_ORDER_TOTAL = Decimal("9999999999.99")
-ORDER_HISTORY_DURATIONS = {
-    "3_months": 3,
-    "6_months": 6,
-    "1_year": 12,
-}
-
-
 def _subtract_months(value: datetime, months: int) -> datetime:
     """Subtract calendar months while keeping the resulting date valid."""
     month_index = value.year * 12 + value.month - 1 - months
@@ -192,9 +185,11 @@ def place_order(
 def get_order_history(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100, alias="pageSize"),
-    duration: Literal["3_months", "6_months", "1_year"] | None = Query(
+    duration: int | None = Query(
         default=None,
-        description="Rolling date window: 3_months, 6_months, or 1_year",
+        ge=1,
+        le=36,
+        description="Rolling date window in months (1–36)",
     ),
     year: int | None = Query(default=None, ge=1970, le=9998),
     current_user: User = Depends(get_current_user),
@@ -211,7 +206,7 @@ def get_order_history(
     if duration is not None:
         cutoff = _subtract_months(
             datetime.now(timezone.utc),
-            ORDER_HISTORY_DURATIONS[duration],
+            duration,
         )
         filters.append(Order.created_at >= cutoff)
     elif year is not None:
