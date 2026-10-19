@@ -28,6 +28,7 @@ from ....schemas.auth import (
     EmailRequest,
     LoginRequest,
     LogoutRequest,
+    ProfileUpdateRequest,
     RegisterAddress,
     RefreshTokenRequest,
     RegisterRequest,
@@ -319,6 +320,28 @@ def logout(payload: LogoutRequest, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserRead)
 def read_current_user(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.patch("/me", response_model=UserRead)
+def update_current_user_profile(
+    payload: ProfileUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    updates = payload.model_dump(exclude_unset=True)
+    if not updates:
+        raise HTTPException(status_code=400, detail="No profile fields provided")
+    if "full_name" in updates and updates["full_name"] is None:
+        raise HTTPException(status_code=422, detail="Full name cannot be null")
+
+    for field, value in updates.items():
+        setattr(current_user, field, value)
+    if current_user.full_name:
+        current_user.profile_completed = True
+
+    db.commit()
+    db.refresh(current_user)
     return current_user
 
 

@@ -19,6 +19,7 @@ class User(Base):
     full_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
     password_hash: Mapped[str | None] = mapped_column(String(512), nullable=True)
     gender: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    phone_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
     address: Mapped[str | None] = mapped_column(String(500), nullable=True)
     pin: Mapped[str | None] = mapped_column(String(12), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

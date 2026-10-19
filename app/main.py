@@ -43,6 +43,7 @@ def update_existing_user_columns() -> None:
     )
     new_columns = {
         "password_hash": "VARCHAR(512)",
+        "phone_number": "VARCHAR(20)",
         "address": "VARCHAR(500)",
         "pin": "VARCHAR(12)",
     }

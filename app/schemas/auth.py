@@ -66,11 +66,24 @@ class CreateProfileRequest(BaseModel):
     gender: int | None = Field(default=None, ge=0, le=2, description="0=male, 1=female, 2=others")
 
 
+class ProfileUpdateRequest(BaseModel):
+    full_name: str | None = Field(default=None, min_length=2, max_length=120, alias="fullName")
+    gender: int | None = Field(default=None, ge=0, le=2, description="0=male, 1=female, 2=others")
+    phone_number: str | None = Field(
+        default=None,
+        alias="phoneNumber",
+        pattern=r"^\+?[0-9]{7,15}$",
+    )
+
+    model_config = ConfigDict(str_strip_whitespace=True, populate_by_name=True)
+
+
 class UserRead(BaseModel):
     id: int
     full_name: str | None
     email: EmailStr | None
     gender: int | None
+    phone_number: str | None
     profile_completed: bool
     model_config = {"from_attributes": True}
 
