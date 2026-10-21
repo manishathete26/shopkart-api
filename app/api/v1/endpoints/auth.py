@@ -323,7 +323,7 @@ def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-@router.patch("/me", response_model=UserRead)
+@router.patch("/Edit-profile", response_model=UserRead)
 def update_current_user_profile(
     payload: ProfileUpdateRequest,
     current_user: User = Depends(get_current_user),
