@@ -157,10 +157,10 @@ erDiagram
 
 The `POST /orders` endpoint validates the authenticated user's delivery address and PIN, cart contents, selected variants, stock limits, and total before saving an order, decrementing the purchased stock, and clearing the cart in one transaction. `GET /orders` returns only that user's orders, newest first, with item snapshots and pagination (`page`, `pageSize`, maximum 100). It also accepts one date filter at a time:
 
-- `duration=3_months`, `duration=6_months`, or `duration=1_year` for a rolling window ending now (UTC).
+- `duration=1` through `duration=36` for a rolling window ending now (UTC), where the value is a number of months.
 - `year=2025` for orders placed during that calendar year (UTC).
 
-For example: `GET /orders?page=1&pageSize=20&duration=6_months` or `GET /orders?year=2025`. Supplying both `duration` and `year` returns HTTP 422. The total count and page count are calculated after applying the selected filter. Both endpoints require a valid access token in the `Authorization: Bearer <token>` header.
+For example: `GET /orders?page=1&pageSize=20&duration=6` or `GET /orders?year=2025`. Values outside the 1–36 month range or supplying both `duration` and `year` return HTTP 422. The total count and page count are calculated after applying the selected filter. Both endpoints require a valid access token in the `Authorization: Bearer <token>` header.
 
 Current product variant data (including variant IDs, price, stock, and images) is stored inside the `products.variants` JSON column. The startup migration contains compatibility logic for a legacy `product_variants` table and copies its contents into that JSON column when appropriate. `product_variants` is not declared as a current SQLAlchemy model and is not part of the current entity relationship diagram.
 

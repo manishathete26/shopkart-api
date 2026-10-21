@@ -175,7 +175,7 @@ async def send_otp(
         db.commit()
 
         raise HTTPException(
-            status_code=502,
+            status_code=status.HTTP_502_BAD_GATEWAY,
             detail="OTP email could not be sent. Please try again.",
         ) from error
 
@@ -199,7 +199,7 @@ def verify_otp(payload: VerifyOTPRequest, db: Session = Depends(get_db)):
     )
 
     if not otp_record:
-        raise HTTPException(status_code=400, detail="OTP is invalid or expired")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OTP is invalid or expired")
 
     # SQLite may return this datetime without timezone information.
     expires_at = otp_record.expires_at
@@ -207,15 +207,15 @@ def verify_otp(payload: VerifyOTPRequest, db: Session = Depends(get_db)):
         expires_at = expires_at.replace(tzinfo=timezone.utc)
 
     if expires_at <= utc_now():
-        raise HTTPException(status_code=400, detail="OTP is invalid or expired")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OTP is invalid or expired")
 
     if otp_record.attempts >= 5:
-        raise HTTPException(status_code=429, detail="Too many OTP attempts")
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too many OTP attempts")
 
     if otp_record.code_hash != hash_otp(email, payload.otp):
         otp_record.attempts += 1
         db.commit()
-        raise HTTPException(status_code=400, detail="Invalid OTP")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OTP")
 
     otp_record.is_used = True
 
@@ -264,7 +264,7 @@ def refresh_token(
         token_id = claims["jti"]
 
     except (InvalidTokenError, KeyError, ValueError):
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
     session = db.scalar(
         select(RefreshSession).where(RefreshSession.token_id == token_id)
@@ -272,7 +272,7 @@ def refresh_token(
 
     if not session or session.is_revoked:
         raise HTTPException(
-            status_code=401,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token is expired or revoked",
         )
 
@@ -282,13 +282,13 @@ def refresh_token(
 
     if expires_at <= utc_now():
         raise HTTPException(
-            status_code=401,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token is expired or revoked",
         )
 
     user = db.get(User, user_id)
     if not user or not user.is_active:
-        raise HTTPException(status_code=401, detail="User is unavailable")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is unavailable")
 
     session.is_revoked = True
     db.commit()
@@ -308,7 +308,7 @@ def logout(payload: LogoutRequest, db: Session = Depends(get_db)):
             raise InvalidTokenError
         token_id = claims["jti"]
     except (InvalidTokenError, KeyError):
-        raise HTTPException(status_code=400, detail="Invalid refresh token")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid refresh token")
 
     session = db.scalar(
         select(RefreshSession).where(RefreshSession.token_id == token_id)

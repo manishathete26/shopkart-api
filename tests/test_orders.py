@@ -6,6 +6,7 @@ from decimal import Decimal
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "shopkart-test-secret-key-at-least-32-bytes-long")
 
+from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
@@ -132,13 +133,13 @@ class OrderApiTest(unittest.TestCase):
             return order.id
 
     def test_history_requires_valid_access_token(self):
-        self.assertEqual(self.client.get("/orders").status_code, 401)
+        self.assertEqual(self.client.get("/orders").status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(
             self.client.get(
                 "/orders",
                 headers={"Authorization": "Bearer invalid"},
             ).status_code,
-            401,
+            status.HTTP_401_UNAUTHORIZED,
         )
 
     def test_place_order_snapshots_items_decrements_stock_and_clears_cart(self):
@@ -146,7 +147,7 @@ class OrderApiTest(unittest.TestCase):
 
         response = self.client.post("/orders", headers=self.headers)
 
-        self.assertEqual(response.status_code, 201, response.text)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.text)
         data = response.json()
         self.assertEqual(data["status"], "placed")
         self.assertEqual(data["total_amount"], "25.00")
@@ -166,7 +167,7 @@ class OrderApiTest(unittest.TestCase):
 
     def test_checkout_rejects_empty_cart_and_incomplete_delivery_details(self):
         empty_cart = self.client.post("/orders", headers=self.headers)
-        self.assertEqual(empty_cart.status_code, 400)
+        self.assertEqual(empty_cart.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(empty_cart.json()["detail"], "Cannot place an order with an empty cart")
 
         user_id = self.create_user(
@@ -179,20 +180,20 @@ class OrderApiTest(unittest.TestCase):
             "/orders",
             headers={"Authorization": f"Bearer {token}"},
         )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("delivery address", response.json()["detail"])
 
     def test_checkout_rejects_unavailable_variant_and_quantity(self):
         self.add_cart_item(variant_id="missing-variant")
         missing_variant = self.client.post("/orders", headers=self.headers)
-        self.assertEqual(missing_variant.status_code, 409)
+        self.assertEqual(missing_variant.status_code, status.HTTP_409_CONFLICT)
 
         with self.SessionLocal() as db:
             db.query(CartItem).filter(CartItem.user_id == self.user_id).delete()
             db.commit()
         self.add_cart_item(quantity=6)
         unavailable_quantity = self.client.post("/orders", headers=self.headers)
-        self.assertEqual(unavailable_quantity.status_code, 409)
+        self.assertEqual(unavailable_quantity.status_code, status.HTTP_409_CONFLICT)
 
     def test_history_is_user_scoped_and_paginated(self):
         now = datetime.now(timezone.utc)
@@ -205,7 +206,7 @@ class OrderApiTest(unittest.TestCase):
             "/orders?page=1&pageSize=1",
             headers=self.headers,
         )
-        self.assertEqual(first_page.status_code, 200, first_page.text)
+        self.assertEqual(first_page.status_code, status.HTTP_200_OK, first_page.text)
         first_data = first_page.json()
         self.assertEqual(first_data["count"], 2)
         self.assertEqual(first_data["page"], 1)
@@ -227,9 +228,10 @@ class OrderApiTest(unittest.TestCase):
         self.add_order(self.user_id, now - timedelta(days=430), 4)
 
         expected_counts = {
-            "3_months": 1,
-            "6_months": 2,
-            "1_year": 3,
+            2: 1,
+            3: 1,
+            6: 2,
+            12: 3,
         }
         for duration, expected_count in expected_counts.items():
             with self.subTest(duration=duration):
@@ -238,7 +240,7 @@ class OrderApiTest(unittest.TestCase):
                     params={"duration": duration},
                     headers=self.headers,
                 )
-                self.assertEqual(response.status_code, 200, response.text)
+                self.assertEqual(response.status_code, status.HTTP_200_OK, response.text)
                 self.assertEqual(response.json()["count"], expected_count)
                 self.assertEqual(response.json()["totalPages"], 1)
 
@@ -263,14 +265,14 @@ class OrderApiTest(unittest.TestCase):
             "/orders?year=2025",
             headers=self.headers,
         )
-        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.text)
         self.assertEqual(response.json()["count"], 2)
 
         conflict = self.client.get(
-            "/orders?year=2025&duration=6_months",
+            "/orders?year=2025&duration=6",
             headers=self.headers,
         )
-        self.assertEqual(conflict.status_code, 422)
+        self.assertEqual(conflict.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
 
     def test_history_rejects_invalid_pagination_and_duration(self):
         invalid_page = self.client.get(
@@ -281,13 +283,18 @@ class OrderApiTest(unittest.TestCase):
             "/orders?pageSize=101",
             headers=self.headers,
         )
-        invalid_duration = self.client.get(
-            "/orders?duration=2_months",
+        invalid_duration_below_minimum = self.client.get(
+            "/orders?duration=0",
             headers=self.headers,
         )
-        self.assertEqual(invalid_page.status_code, 422)
-        self.assertEqual(invalid_page_size.status_code, 422)
-        self.assertEqual(invalid_duration.status_code, 422)
+        invalid_duration_above_maximum = self.client.get(
+            "/orders?duration=37",
+            headers=self.headers,
+        )
+        self.assertEqual(invalid_page.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
+        self.assertEqual(invalid_page_size.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
+        self.assertEqual(invalid_duration_below_minimum.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
+        self.assertEqual(invalid_duration_above_maximum.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
 
 
 if __name__ == "__main__":
