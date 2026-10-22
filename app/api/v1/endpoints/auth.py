@@ -331,9 +331,9 @@ def update_current_user_profile(
 ):
     updates = payload.model_dump(exclude_unset=True)
     if not updates:
-        raise HTTPException(status_code=400, detail="No profile fields provided")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No profile fields provided")
     if "full_name" in updates and updates["full_name"] is None:
-        raise HTTPException(status_code=422, detail="Full name cannot be null")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Full name cannot be null")
 
     for field, value in updates.items():
         setattr(current_user, field, value)
