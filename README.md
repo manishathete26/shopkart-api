@@ -47,7 +47,7 @@ flowchart LR
 
 ## Database tables and relationships
 
-The diagram below documents the eight SQLAlchemy tables currently declared by the application. `users` and `products` are parent tables; cart and wishlist rows link users to products. Orders belong to users and contain item snapshots. Product variants are embedded as JSON in `products.variants`, so they are not a separate current table.
+The diagram below documents the nine SQLAlchemy tables currently declared by the application. `users` and `products` are parent tables; saved addresses, cart and wishlist rows, refresh sessions, and orders belong to users. Orders contain item snapshots. Product variants are embedded as JSON in `products.variants`, so they are not a separate current table.
 
 ```mermaid
 erDiagram
@@ -56,6 +56,7 @@ erDiagram
     USERS ||--o{ WISHLIST_ITEMS : owns
     PRODUCTS ||--o{ WISHLIST_ITEMS : appears_in
     USERS ||--o{ REFRESH_SESSIONS : has
+    USERS ||--o{ ADDRESSES : saves
     USERS ||--o{ ORDERS : places
     ORDERS ||--|{ ORDER_ITEMS : contains
     PRODUCTS o|--o{ ORDER_ITEMS : referenced_by
@@ -66,6 +67,7 @@ erDiagram
         string full_name "nullable"
         string password_hash "nullable"
         int gender "nullable"
+        string phone_number "nullable"
         string address "nullable"
         string pin "nullable"
         boolean is_active
@@ -86,6 +88,17 @@ erDiagram
         string token_id UK
         datetime expires_at
         boolean is_revoked
+    }
+    ADDRESSES {
+        int id PK
+        int user_id FK
+        string label "nullable"
+        string address
+        string street "nullable"
+        string city "nullable"
+        string state "nullable"
+        string pin "nullable"
+        datetime created_at
     }
     ORDERS {
         int id PK
@@ -146,12 +159,28 @@ erDiagram
 | `users` | `wishlist_items` | One user to many wishlist rows | `wishlist_items.user_id → users.id`; no delete cascade is declared on this FK. |
 | `products` | `wishlist_items` | One product to many wishlist rows | `wishlist_items.product_id → products.id`; deleting a product cascades to its wishlist rows. |
 | `users` | `refresh_sessions` | One user to many refresh sessions | `refresh_sessions.user_id → users.id`; no delete cascade is declared on this FK. |
+| `users` | `addresses` | One user to many saved addresses | `addresses.user_id → users.id`; deleting a user cascades to saved addresses. Registration creates a `Home` address, and existing legacy user addresses are copied into this table at startup when missing. |
 | `users` | `orders` | One user to many orders | `orders.user_id → users.id`; order history is scoped to the authenticated user. |
 | `orders` | `order_items` | One order to one or more line items | `order_items.order_id → orders.id`; deleting an order cascades to its items. |
 | `products` | `order_items` | One product may be referenced by many order items | Nullable `order_items.product_id → products.id` with `ON DELETE SET NULL`; order item names, variant, and prices are snapshots. |
 | — | `otp_codes` | No relational FK | OTP records are looked up by email; the schema does not link them to `users.id`. |
 
 `cart_items` enforces one row per `(user_id, product_id, variant_id)`. `wishlist_items` enforces one row per `(user_id, product_id)`; its `variant_id` is optional metadata and does not change that uniqueness rule. Both `cart_items` and `wishlist_items` contain foreign keys to `users` and `products`, although only the product model declares an ORM relationship property.
+
+### API routes
+
+Routes are mounted directly on the FastAPI application (there is no `/api/v1` URL prefix). All routes below use the listed paths. Endpoints marked **Bearer** require an access token in `Authorization: Bearer <token>`.
+
+| Area | Routes | Notes |
+| --- | --- | --- |
+| Authentication | `POST /auth/register`, `/auth/login`, `/auth/send-otp`, `/auth/verify-otp`, `/auth/create-profile`, `/auth/refresh`, `/auth/logout`; `GET /auth/me`; `PATCH /auth/Edit-profile` | Password registration/login and email OTP flows; token refresh/logout and profile operations. |
+| Catalog | `GET /home`; `GET /products`; `GET /products/{product_id}` | Home content includes categories, best deals, and paginated products. Product listing supports search, category, brand, price, rating, sorting, and pagination filters. |
+| Cart (**Bearer**) | `GET /cart`; `POST /cart/items`; `PATCH /cart/items/{item_id}`; `DELETE /cart/items/{item_id}` | Cart rows identify a product variant and enforce available stock. |
+| Wishlist (**Bearer**) | `GET /wishlist`; `POST /wishlist`; `DELETE /wishlist/{product_id}` | One entry per product per user, with the selected variant retained as metadata. |
+| Addresses (**Bearer**) | `GET /addresses`; `POST /addresses`; `PATCH /addresses/{address_id}`; `DELETE /addresses/{address_id}` | Saved addresses are scoped to the authenticated user; create accepts a full address or structured street, city, and state fields. |
+| Orders (**Bearer**) | `POST /orders`; `GET /orders` | Placement validates the cart, address, selected variants, stock, and total in one transaction. History supports `page`, `pageSize`, and either `duration` (1–36 months) or `year`. |
+
+The `products` API response uses the existing catalog JSON shape (`subCategory`, `parentId`, and related camelCase fields). List endpoints use `page` and `pageSize` query parameters where applicable; product/home pages allow up to 100 items per page.
 
 ### Product variants and legacy data
 
