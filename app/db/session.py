@@ -91,6 +91,133 @@ def ensure_wishlist_variant_column() -> None:
         ))
 
 
+def ensure_refresh_session_keys() -> None:
+    """Repair legacy PostgreSQL refresh-session keys without dropping sessions.
+
+    Older Neon databases may have the SQLAlchemy sequence default but lack the
+    primary-key and unique-index constraints declared by the current model.
+    Duplicate IDs are reassigned so every existing refresh session is retained.
+    """
+    if engine.dialect.name != "postgresql":
+        return
+
+    inspector = inspect(engine)
+    if "refresh_sessions" not in inspector.get_table_names():
+        return
+
+    with engine.begin() as connection:
+        connection.execute(text(
+            "LOCK TABLE public.refresh_sessions IN ACCESS EXCLUSIVE MODE"
+        ))
+
+        primary_key_columns = connection.execute(text("""
+            SELECT array_agg(a.attname ORDER BY key_column.ordinality)
+            FROM pg_constraint AS constraint_row
+            CROSS JOIN LATERAL unnest(constraint_row.conkey)
+                WITH ORDINALITY AS key_column(attnum, ordinality)
+            JOIN pg_attribute AS a
+              ON a.attrelid = constraint_row.conrelid
+             AND a.attnum = key_column.attnum
+            WHERE constraint_row.conrelid = 'public.refresh_sessions'::regclass
+              AND constraint_row.contype = 'p'
+            GROUP BY constraint_row.oid
+        """)).scalar_one_or_none()
+
+        if primary_key_columns not in (None, ["id"]):
+            raise RuntimeError(
+                "refresh_sessions has a primary key other than id; "
+                "the refresh-session key migration stopped without changing rows."
+            )
+
+        if primary_key_columns is None:
+            duplicate_or_null_ids = connection.execute(text("""
+                SELECT COUNT(*)
+                FROM (
+                    SELECT id
+                    FROM public.refresh_sessions
+                    GROUP BY id
+                    HAVING id IS NULL OR COUNT(*) > 1
+                ) AS invalid_ids
+            """)).scalar_one()
+
+            if duplicate_or_null_ids:
+                connection.execute(text("""
+                    WITH ranked AS (
+                        SELECT ctid, id,
+                               row_number() OVER (
+                                   PARTITION BY id ORDER BY ctid
+                               ) AS duplicate_rank
+                        FROM public.refresh_sessions
+                    ), rows_to_rekey AS (
+                        SELECT ctid,
+                               row_number() OVER (
+                                   ORDER BY id NULLS FIRST, ctid
+                               ) AS new_rank
+                        FROM ranked
+                        WHERE id IS NULL OR duplicate_rank > 1
+                    ), current_max AS (
+                        SELECT COALESCE(MAX(id), 0) AS max_id
+                        FROM public.refresh_sessions
+                    )
+                    UPDATE public.refresh_sessions AS session_row
+                    SET id = current_max.max_id + rows_to_rekey.new_rank
+                    FROM rows_to_rekey, current_max
+                    WHERE session_row.ctid = rows_to_rekey.ctid
+                """))
+
+            connection.execute(text("""
+                ALTER TABLE public.refresh_sessions
+                ADD CONSTRAINT refresh_sessions_pkey PRIMARY KEY (id)
+            """))
+
+        unique_token_index = connection.execute(text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM pg_index AS index_row
+                JOIN pg_attribute AS indexed_column
+                  ON indexed_column.attrelid = index_row.indrelid
+                 AND indexed_column.attnum = index_row.indkey[0]
+                WHERE index_row.indrelid = 'public.refresh_sessions'::regclass
+                  AND index_row.indisunique
+                  AND index_row.indisvalid
+                  AND index_row.indnkeyatts = 1
+                  AND indexed_column.attname = 'token_id'
+            )
+        """)).scalar_one()
+
+        if not unique_token_index:
+            duplicate_tokens = connection.execute(text("""
+                SELECT COUNT(*)
+                FROM (
+                    SELECT token_id
+                    FROM public.refresh_sessions
+                    GROUP BY token_id
+                    HAVING token_id IS NULL OR COUNT(*) > 1
+                ) AS invalid_tokens
+            """)).scalar_one()
+            if duplicate_tokens:
+                raise RuntimeError(
+                    "refresh_sessions contains duplicate or null token IDs; "
+                    "the unique-index migration stopped without deleting sessions."
+                )
+            connection.execute(text("""
+                CREATE UNIQUE INDEX uq_refresh_sessions_token_id
+                ON public.refresh_sessions (token_id)
+            """))
+
+        sequence_exists = connection.execute(text("""
+            SELECT pg_get_serial_sequence('public.refresh_sessions', 'id')
+        """)).scalar_one()
+        if sequence_exists:
+            connection.execute(text("""
+                SELECT setval(
+                    pg_get_serial_sequence('public.refresh_sessions', 'id'),
+                    COALESCE((SELECT MAX(id) FROM public.refresh_sessions), 1),
+                    EXISTS (SELECT 1 FROM public.refresh_sessions)
+                )
+            """))
+
+
 def get_db():
     db = SessionLocal()
     try:
