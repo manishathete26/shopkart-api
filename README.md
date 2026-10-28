@@ -157,6 +157,8 @@ erDiagram
 
 The `POST /orders` endpoint validates the authenticated user's delivery address and PIN, cart contents, selected variants, stock limits, and total before saving an order, decrementing the purchased stock, and clearing the cart in one transaction. `GET /orders` returns only that user's orders, newest first, with item snapshots and pagination (`page`, `pageSize`, maximum 100). It also accepts one date filter at a time:
 
+`POST /wishlist/{product_id}/cart` moves a saved variant into the authenticated user's cart and removes it from the wishlist atomically. The endpoint rejects missing variants or insufficient stock without changing the wishlist. See `CART_API.md` for request and response details.
+
 - `duration=1` through `duration=36` for a rolling window ending now (UTC), where the value is a number of months.
 - `year=2025` for orders placed during that calendar year (UTC).
 
