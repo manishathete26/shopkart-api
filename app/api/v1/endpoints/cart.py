@@ -10,6 +10,7 @@ from ....db.session import get_db
 from ....models.auth import User
 from ....models.cart import CartItem
 from ....models.product import Product
+from ....models.wishlist import WishlistItem
 from ....schemas.cart import CartItemCreate, CartItemUpdate
 
 router = APIRouter(prefix="/cart", tags=["cart"])
@@ -84,7 +85,7 @@ def add_cart_item(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
-    """Add a product variant, increasing its quantity if already in the cart."""
+    """Add a product variant and remove its exact wishlist entry, if present."""
     product = db.get(Product, payload.parent_id)
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
@@ -113,13 +114,28 @@ def add_cart_item(
         )
         db.add(item)
 
+    wishlist_item = db.scalar(
+        select(WishlistItem).where(
+            WishlistItem.user_id == current_user.id,
+            WishlistItem.product_id == payload.parent_id,
+            WishlistItem.variant_id == payload.variant_id,
+        )
+    )
+    if wishlist_item is not None:
+        db.delete(wishlist_item)
+
     try:
         db.commit()
     except IntegrityError as error:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cart item could not be added") from error
     db.refresh(item)
-    return {"message": "Item added to cart", "item_id": item.id, **cart_response(db, current_user.id)}
+    return {
+        "message": "Item added to cart",
+        "item_id": item.id,
+        "wishlist_item_removed": wishlist_item is not None,
+        **cart_response(db, current_user.id),
+    }
 
 
 @router.patch("/items/{item_id}")
