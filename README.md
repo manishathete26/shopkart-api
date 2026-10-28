@@ -189,6 +189,8 @@ The `products` API response uses the existing catalog JSON shape (`subCategory`,
 
 The `POST /orders` endpoint requires a JSON body containing the ID of one of the authenticated user's saved addresses, for example `{"address_id": 42}`. It validates that address and its six-digit PIN along with cart contents, selected variants, stock limits, and total before saving an order, decrementing the purchased stock, and clearing the cart in one transaction. Orders retain `shipping_address_id` as a nullable reference and snapshot `shipping_address` and `shipping_pin`, so order history remains stable if the saved address is edited or deleted. Existing orders keep a null address reference. `GET /orders` returns only that user's orders, newest first, with item snapshots and pagination (`page`, `pageSize`, maximum 100). It also accepts one date filter at a time:
 
+`POST /wishlist/{product_id}/cart` moves a saved variant into the authenticated user's cart and removes it from the wishlist atomically. `POST /cart/items` also removes a matching wishlist variant when adding it to the cart. Both operations preserve the wishlist entry if stock validation or the database transaction fails. See `CART_API.md` for request and response details.
+
 - `duration=1` through `duration=36` for a rolling window ending now (UTC), where the value is a number of months.
 - `year=2025` for orders placed during that calendar year (UTC).
 

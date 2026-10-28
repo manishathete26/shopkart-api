@@ -6,10 +6,12 @@ from sqlalchemy.orm import Session, selectinload
 from ....api.deps import get_current_user
 from ....db.session import get_db
 from ....models.auth import User
+from ....models.cart import CartItem
 from ....models.product import Product
 from ....models.wishlist import WishlistItem
 from ....schemas.wishlist import WishlistAddRequest
 from ....services.product_catalog import product_to_dict
+from .cart import cart_response, get_variant_price_and_stock
 
 router = APIRouter(prefix="/wishlist", tags=["wishlist"])
 
@@ -97,6 +99,84 @@ def get_wishlist(
             }
             for item in items
         ],
+    }
+
+
+@router.post("/{product_id}/cart")
+def move_wishlist_item_to_cart(
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Move a saved product variant into the authenticated user's cart."""
+    wishlist_item = db.scalar(
+        select(WishlistItem)
+        .where(
+            WishlistItem.user_id == current_user.id,
+            WishlistItem.product_id == product_id,
+        )
+        .with_for_update()
+    )
+    if wishlist_item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Wishlist item not found")
+    if not wishlist_item.variant_id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Choose a product variant before moving this item to the cart",
+        )
+
+    product = db.get(Product, wishlist_item.product_id)
+    if product is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+
+    _, _, stock = get_variant_price_and_stock(product, wishlist_item.variant_id)
+    cart_item = db.scalar(
+        select(CartItem)
+        .where(
+            CartItem.user_id == current_user.id,
+            CartItem.product_id == product_id,
+            CartItem.variant_id == wishlist_item.variant_id,
+        )
+        .with_for_update()
+    )
+    new_quantity = (cart_item.quantity if cart_item else 0) + 1
+    if stock == 0 or new_quantity > stock or new_quantity > 99:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Requested quantity is not available in stock",
+        )
+
+    if cart_item:
+        cart_item.quantity = new_quantity
+    else:
+        cart_item = CartItem(
+            user_id=current_user.id,
+            product_id=product_id,
+            variant_id=wishlist_item.variant_id,
+            quantity=1,
+        )
+        db.add(cart_item)
+
+    wishlist_item_id = wishlist_item.id
+    variant_id = wishlist_item.variant_id
+    db.delete(wishlist_item)
+    try:
+        db.commit()
+    except IntegrityError as error:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Wishlist item could not be moved to the cart",
+        ) from error
+
+    db.refresh(cart_item)
+    return {
+        "message": "Wishlist item moved to cart",
+        "wishlist_item_id": wishlist_item_id,
+        "item_id": cart_item.id,
+        "product_id": product_id,
+        "variant_id": variant_id,
+        **cart_response(db, current_user.id),
     }
 
 
