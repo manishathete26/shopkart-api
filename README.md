@@ -60,6 +60,7 @@ erDiagram
     USERS ||--o{ ORDERS : places
     ORDERS ||--|{ ORDER_ITEMS : contains
     PRODUCTS o|--o{ ORDER_ITEMS : referenced_by
+    ADDRESSES o|--o{ ORDERS : selected_for
 
     USERS {
         int id PK
@@ -105,6 +106,7 @@ erDiagram
         int user_id FK
         string status
         decimal total_amount
+        int shipping_address_id FK "nullable; set null on address deletion"
         string shipping_address "nullable snapshot"
         string shipping_pin "nullable snapshot"
         datetime created_at
@@ -161,6 +163,7 @@ erDiagram
 | `users` | `refresh_sessions` | One user to many refresh sessions | `refresh_sessions.user_id → users.id`; no delete cascade is declared on this FK. |
 | `users` | `addresses` | One user to many saved addresses | `addresses.user_id → users.id`; deleting a user cascades to saved addresses. Registration creates a `Home` address, and existing legacy user addresses are copied into this table at startup when missing. |
 | `users` | `orders` | One user to many orders | `orders.user_id → users.id`; order history is scoped to the authenticated user. |
+| `addresses` | `orders` | One saved address may be selected for many orders | Nullable `orders.shipping_address_id → addresses.id` with `ON DELETE SET NULL`; address and PIN snapshots remain after address edits or deletion. |
 | `orders` | `order_items` | One order to one or more line items | `order_items.order_id → orders.id`; deleting an order cascades to its items. |
 | `products` | `order_items` | One product may be referenced by many order items | Nullable `order_items.product_id → products.id` with `ON DELETE SET NULL`; order item names, variant, and prices are snapshots. |
 | — | `otp_codes` | No relational FK | OTP records are looked up by email; the schema does not link them to `users.id`. |
@@ -178,13 +181,13 @@ Routes are mounted directly on the FastAPI application (there is no `/api/v1` UR
 | Cart (**Bearer**) | `GET /cart`; `POST /cart/items`; `PATCH /cart/items/{item_id}`; `DELETE /cart/items/{item_id}` | Cart rows identify a product variant and enforce available stock. |
 | Wishlist (**Bearer**) | `GET /wishlist`; `POST /wishlist`; `DELETE /wishlist/{product_id}` | One entry per product per user, with the selected variant retained as metadata. |
 | Addresses (**Bearer**) | `GET /addresses`; `POST /addresses`; `PATCH /addresses/{address_id}`; `DELETE /addresses/{address_id}` | Saved addresses are scoped to the authenticated user; create accepts a full address or structured street, city, and state fields. |
-| Orders (**Bearer**) | `POST /orders`; `GET /orders` | Placement validates the cart, address, selected variants, stock, and total in one transaction. History supports `page`, `pageSize`, and either `duration` (1–36 months) or `year`. |
+| Orders (**Bearer**) | `POST /orders`; `GET /orders` | Placement accepts a saved `addressId`, validates the caller-owned address, cart, selected variants, stock, and total in one transaction. History supports `page`, `pageSize`, and either `duration` (1–36 months) or `year`. |
 
 The `products` API response uses the existing catalog JSON shape (`subCategory`, `parentId`, and related camelCase fields). List endpoints use `page` and `pageSize` query parameters where applicable; product/home pages allow up to 100 items per page.
 
 ### Product variants and legacy data
 
-The `POST /orders` endpoint validates the authenticated user's delivery address and PIN, cart contents, selected variants, stock limits, and total before saving an order, decrementing the purchased stock, and clearing the cart in one transaction. `GET /orders` returns only that user's orders, newest first, with item snapshots and pagination (`page`, `pageSize`, maximum 100). It also accepts one date filter at a time:
+The `POST /orders` endpoint requires a JSON body containing the ID of one of the authenticated user's saved addresses, for example `{"addressId": 42}`. It validates that address and its six-digit PIN along with cart contents, selected variants, stock limits, and total before saving an order, decrementing the purchased stock, and clearing the cart in one transaction. Orders retain `shipping_address_id` as a nullable reference and snapshot `shipping_address` and `shipping_pin`, so order history remains stable if the saved address is edited or deleted. Existing orders keep a null address reference. `GET /orders` returns only that user's orders, newest first, with item snapshots and pagination (`page`, `pageSize`, maximum 100). It also accepts one date filter at a time:
 
 - `duration=1` through `duration=36` for a rolling window ending now (UTC), where the value is a number of months.
 - `year=2025` for orders placed during that calendar year (UTC).
