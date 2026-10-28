@@ -36,7 +36,7 @@ flowchart LR
 
 | Area | Responsibility |
 | --- | --- |
-| `app/main.py` | Loads configuration, creates tables, runs catalog migrations/seeding, configures CORS, and mounts the API router. |
+| `app/main.py` | Loads configuration, creates tables, repairs legacy refresh-session keys, runs catalog migrations/seeding, configures CORS, and mounts the API router. |
 | `app/api/v1/endpoints/` | HTTP endpoints for auth, catalog, products, cart, wishlist, and order operations. |
 | `app/api/deps.py` | Shared authentication dependencies, including the current-user dependency. |
 | `app/schemas/` | Pydantic request and response schemas. |
@@ -192,6 +192,8 @@ The `POST /orders` endpoint validates the authenticated user's delivery address 
 For example: `GET /orders?page=1&pageSize=20&duration=6` or `GET /orders?year=2025`. Values outside the 1–36 month range or supplying both `duration` and `year` return HTTP 422. The total count and page count are calculated after applying the selected filter. Both endpoints require a valid access token in the `Authorization: Bearer <token>` header.
 
 Current product variant data (including variant IDs, price, stock, and images) is stored inside the `products.variants` JSON column. The startup migration contains compatibility logic for a legacy `product_variants` table and copies its contents into that JSON column when appropriate. `product_variants` is not declared as a current SQLAlchemy model and is not part of the current entity relationship diagram.
+
+On PostgreSQL, startup also repairs legacy `refresh_sessions` tables by reassigning duplicate or null session IDs without deleting sessions, ensuring the `id` primary key and unique `token_id` index, and synchronizing the ID sequence.
 
 ## Running locally
 

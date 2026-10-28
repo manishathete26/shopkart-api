@@ -296,8 +296,12 @@ def refresh_token(
     return token_pair_for(user, db)
 
 
-@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(payload: LogoutRequest, db: Session = Depends(get_db)):
+@router.post(
+    "/logout",
+    response_model=dict[str, str],
+    status_code=status.HTTP_200_OK,
+)
+def logout(payload: LogoutRequest, db: Session = Depends(get_db)) -> dict[str, str]:
     try:
         claims = jwt.decode(
             payload.refresh_token,
@@ -316,6 +320,8 @@ def logout(payload: LogoutRequest, db: Session = Depends(get_db)):
     if session:
         session.is_revoked = True
         db.commit()
+
+    return {"message": "Logged out successfully"}
 
 
 @router.get("/me", response_model=UserRead)
