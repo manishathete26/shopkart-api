@@ -27,7 +27,10 @@ ensure_refresh_session_keys()
 migrate_legacy_variants(engine)
 
 with SessionLocal() as catalog_db:
-    seed_product_catalog(catalog_db)
+    # Keep the database catalog aligned with the checked-in source of truth.
+    # Existing deployments may have been seeded from an older product dataset,
+    # which makes valid variants fail wishlist/cart validation.
+    seed_product_catalog(catalog_db, replace_existing=True)
 ensure_wishlist_product_foreign_key()
 ensure_wishlist_variant_column()
 
