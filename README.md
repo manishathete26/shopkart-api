@@ -208,4 +208,4 @@ Install dependencies from `requirements.txt`, set any required environment varia
 uvicorn app.main:app --reload
 ```
 
-The default database URL is `sqlite:///./auth.db`. Set `DATABASE_URL` to use another supported database. The product catalog is loaded from `app/data/products.json` when the database has no products. Authentication and email settings are configured with environment variables; see `app/core/security.py` and `app/services/email.py` for the names and defaults.
+The default database URL is `sqlite:///./auth.db`. Set `DATABASE_URL` to use another supported database. On startup, `app/data/products.json` seeds an empty products table. API responses and variant validation use that checked-in catalog while preserving stock values stored in the database, so older database variant data does not cause valid catalog variants to be rejected. Authentication and email settings are configured with environment variables; see `app/core/security.py` and `app/services/email.py` for the names and defaults.

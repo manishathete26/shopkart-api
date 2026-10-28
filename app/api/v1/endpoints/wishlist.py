@@ -10,14 +10,14 @@ from ....models.cart import CartItem
 from ....models.product import Product
 from ....models.wishlist import WishlistItem
 from ....schemas.wishlist import WishlistAddRequest
-from ....services.product_catalog import product_to_dict
+from ....services.product_catalog import product_to_dict, product_variants
 from .cart import cart_response, get_variant_price_and_stock
 
 router = APIRouter(prefix="/wishlist", tags=["wishlist"])
 
 
 def find_variant(product: Product, variant_id: str) -> dict:
-    for variant in product.variants or []:
+    for variant in product_variants(product.id, product.variants):
         if str(variant.get("variantid", "")) == variant_id:
             return variant
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product variant not found")
