@@ -5,6 +5,10 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
+class OrderCreate(BaseModel):
+    address_id: int = Field(gt=0, alias="addressId")
+
+
 class OrderItemRead(BaseModel):
     id: int
     product_id: int | None
@@ -20,6 +24,7 @@ class OrderRead(BaseModel):
     id: int
     status: str
     total_amount: Decimal
+    shipping_address_id: int | None
     shipping_address: str | None
     shipping_pin: str | None
     created_at: datetime

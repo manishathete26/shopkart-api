@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from ....api.deps import get_current_user
 from ....db.session import get_db
 from ....models.address import Address
 from ....models.auth import User
+from ....models.order import Order
 from ....schemas.address import AddressCreate, AddressRead, AddressUpdate
 
 router = APIRouter(prefix="/addresses", tags=["addresses"])
@@ -116,6 +117,13 @@ def delete_address(
     if address is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address not found")
 
+    # SQLite deployments may have foreign-key enforcement disabled; clear the
+    # optional order reference explicitly while preserving its address snapshot.
+    db.execute(
+        update(Order)
+        .where(Order.shipping_address_id == address.id)
+        .values(shipping_address_id=None)
+    )
     db.delete(address)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

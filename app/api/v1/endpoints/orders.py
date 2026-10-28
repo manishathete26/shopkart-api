@@ -1,5 +1,4 @@
 import math
-import re
 from calendar import monthrange
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
@@ -13,10 +12,11 @@ from sqlalchemy.orm import Session, selectinload
 from ....api.deps import get_current_user
 from ....db.session import get_db
 from ....models.auth import User
+from ....models.address import Address
 from ....models.cart import CartItem
 from ....models.order import Order, OrderItem
 from ....models.product import Product
-from ....schemas.order import OrderHistoryRead, OrderRead
+from ....schemas.order import OrderCreate, OrderHistoryRead, OrderRead
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 MAX_ORDER_TOTAL = Decimal("9999999999.99")
@@ -34,6 +34,7 @@ def _order_payload(order: Order) -> dict[str, Any]:
         "id": order.id,
         "status": order.status,
         "total_amount": order.total_amount,
+        "shipping_address_id": order.shipping_address_id,
         "shipping_address": order.shipping_address,
         "shipping_pin": order.shipping_pin,
         "created_at": order.created_at,
@@ -85,16 +86,29 @@ def _get_variant(product: Product, variant_id: str) -> tuple[dict, Decimal, int]
 
 @router.post("", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
 def place_order(
+    payload: OrderCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
-    """Create an order from the authenticated user's current cart."""
-    address = (current_user.address or "").strip()
-    pin = (current_user.pin or "").strip()
-    if not address or not re.fullmatch(r"\d{6}", pin):
+    """Create an order from the current cart and a selected saved address."""
+    saved_address = db.scalar(
+        select(Address).where(
+            Address.id == payload.address_id,
+            Address.user_id == current_user.id,
+        )
+    )
+    if saved_address is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Address not found",
+        )
+
+    address = (saved_address.address or "").strip()
+    pin = (saved_address.pin or "").strip()
+    if not address or len(pin) != 6 or not pin.isdigit():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Complete your delivery address and six-digit PIN before placing an order",
+            detail="Selected address must have a delivery address and six-digit PIN",
         )
 
     cart_items = db.scalars(
@@ -121,6 +135,7 @@ def place_order(
         user_id=current_user.id,
         status="placed",
         total_amount=Decimal("0.00"),
+        shipping_address_id=saved_address.id,
         shipping_address=address,
         shipping_pin=pin,
     )
