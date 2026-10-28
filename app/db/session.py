@@ -90,7 +90,54 @@ def ensure_wishlist_variant_column() -> None:
             "ALTER TABLE wishlist_items ADD COLUMN variant_id VARCHAR(255) NULL"
         ))
 
+def ensure_order_address_reference(target_engine: Engine = engine) -> None:
+    """Add the nullable saved-address reference to existing order tables."""
+    inspector = inspect(target_engine)
+    tables = set(inspector.get_table_names())
+    if "orders" not in tables or "addresses" not in tables:
+        return
 
+    columns = {column["name"] for column in inspector.get_columns("orders")}
+    foreign_keys = inspector.get_foreign_keys("orders")
+    has_address_fk = any(
+        foreign_key.get("constrained_columns") == ["shipping_address_id"]
+        and foreign_key.get("referred_table") == "addresses"
+        for foreign_key in foreign_keys
+    )
+    indexes = {index["name"] for index in inspector.get_indexes("orders")}
+    index_name = "ix_orders_shipping_address_id"
+
+    with target_engine.begin() as connection:
+        if "shipping_address_id" not in columns:
+            if target_engine.dialect.name == "mysql":
+                connection.execute(text(
+                    "ALTER TABLE orders ADD COLUMN shipping_address_id INTEGER NULL"
+                ))
+            else:
+                connection.execute(text("""
+                    ALTER TABLE orders ADD COLUMN shipping_address_id INTEGER NULL
+                    REFERENCES addresses(id) ON DELETE SET NULL
+                """))
+            has_address_fk = target_engine.dialect.name != "mysql"
+
+        if not has_address_fk and target_engine.dialect.name in {"mysql", "postgresql"}:
+            connection.execute(text("""
+                ALTER TABLE orders
+                ADD CONSTRAINT fk_orders_shipping_address_id_addresses
+                FOREIGN KEY (shipping_address_id) REFERENCES addresses(id)
+                ON DELETE SET NULL
+            """))
+
+        if index_name not in indexes:
+            if target_engine.dialect.name == "mysql":
+                connection.execute(text(
+                    f"CREATE INDEX {index_name} ON orders (shipping_address_id)"
+                ))
+            else:
+                connection.execute(text(
+                    f"CREATE INDEX IF NOT EXISTS {index_name} "
+                    "ON orders (shipping_address_id)"
+                ))
 def ensure_refresh_session_keys() -> None:
     """Repair legacy PostgreSQL refresh-session keys without dropping sessions.
 
