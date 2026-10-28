@@ -12,12 +12,13 @@ from ....models.cart import CartItem
 from ....models.product import Product
 from ....models.wishlist import WishlistItem
 from ....schemas.cart import CartItemCreate, CartItemUpdate
+from ....services.product_catalog import product_variants
 
 router = APIRouter(prefix="/cart", tags=["cart"])
 
 
 def find_variant(product: Product, variant_id: str) -> dict:
-    for variant in product.variants or []:
+    for variant in product_variants(product.id, product.variants):
         if str(variant.get("variantid", "")) == variant_id:
             return variant
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product variant not found")

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from ....db.session import get_db
 from ....models.product import Product
-from ....services.product_catalog import product_to_dict
+from ....services.product_catalog import product_to_dict, product_variants
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -30,7 +30,7 @@ def list_products(
 
     def prices_for(product: Product) -> list[float]:
         prices = []
-        for variant in product.variants or []:
+        for variant in product_variants(product.id, product.variants):
             try:
                 price = float(variant.get("price", 0))
             except (TypeError, ValueError):

@@ -1,4 +1,5 @@
 import json
+from functools import lru_cache
 from pathlib import Path
 
 from sqlalchemy import func, inspect, select, text
@@ -12,6 +13,35 @@ CATALOG_PATH = Path(__file__).resolve().parents[1] / "data" / "products.json"
 def read_catalog() -> dict:
     with CATALOG_PATH.open(encoding="utf-8") as catalog_file:
         return json.load(catalog_file)
+
+
+@lru_cache(maxsize=1)
+def _products_by_id() -> dict[int, dict]:
+    return {
+        int(product["id"]): product
+        for product in read_catalog().get("products", [])
+    }
+
+
+def product_variants(product_id: int, persisted_variants: list | None = None) -> list[dict]:
+    """Return canonical variant metadata while retaining database-managed stock."""
+    catalog_product = _products_by_id().get(product_id)
+    if catalog_product is None:
+        return persisted_variants or []
+
+    persisted_by_id = {
+        str(variant.get("variantid", "")): variant
+        for variant in persisted_variants or []
+        if variant.get("variantid")
+    }
+    variants = []
+    for catalog_variant in catalog_product.get("variants", []):
+        variant = dict(catalog_variant)
+        persisted = persisted_by_id.get(str(variant.get("variantid", "")))
+        if persisted is not None and "stock" in persisted:
+            variant["stock"] = persisted["stock"]
+        variants.append(variant)
+    return variants
 
 
 def seed_product_catalog(db: Session, *, replace_existing: bool = False) -> int:
@@ -59,7 +89,7 @@ def product_to_dict(product: Product) -> dict:
         "rating": product.rating,
         "reviews": product.reviews,
         "offers": product.offers or [],
-        "variants": product.variants or [],
+        "variants": product_variants(product.id, product.variants),
         "badge": product.badge,
     }
 

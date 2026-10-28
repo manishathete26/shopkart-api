@@ -17,6 +17,7 @@ from ....models.cart import CartItem
 from ....models.order import Order, OrderItem
 from ....models.product import Product
 from ....schemas.order import OrderHistoryRead, OrderRead
+from ....services.product_catalog import product_variants
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 MAX_ORDER_TOTAL = Decimal("9999999999.99")
@@ -57,7 +58,7 @@ def _get_variant(product: Product, variant_id: str) -> tuple[dict, Decimal, int]
     variant = next(
         (
             entry
-            for entry in product.variants or []
+            for entry in product_variants(product.id, product.variants)
             if str(entry.get("variantid", "")) == variant_id
         ),
         None,
@@ -138,7 +139,9 @@ def place_order(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Requested quantity for {product.name} is no longer available",
             )
-        updated_variants = [dict(entry) for entry in product.variants or []]
+        updated_variants = [
+            dict(entry) for entry in product_variants(product.id, product.variants)
+        ]
         for index, entry in enumerate(updated_variants):
             if str(entry.get("variantid", "")) == cart_item.variant_id:
                 entry["stock"] = stock - cart_item.quantity
