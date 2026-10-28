@@ -167,7 +167,7 @@ class OrderApiTest(unittest.TestCase):
         address_id = self.add_address()
 
         response = self.client.post(
-            "/orders", headers=self.headers, json={"addressId": address_id}
+            "/orders", headers=self.headers, json={"address_id": address_id}
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.text)
@@ -194,7 +194,7 @@ class OrderApiTest(unittest.TestCase):
     def test_checkout_rejects_empty_cart_and_missing_delivery_address(self):
         address_id = self.add_address()
         empty_cart = self.client.post(
-            "/orders", headers=self.headers, json={"addressId": address_id}
+            "/orders", headers=self.headers, json={"address_id": address_id}
         )
         self.assertEqual(empty_cart.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(empty_cart.json()["detail"], "Cannot place an order with an empty cart")
@@ -202,7 +202,7 @@ class OrderApiTest(unittest.TestCase):
         address_id = self.add_address(pin=None)
         self.add_cart_item()
         response = self.client.post(
-            "/orders", headers=self.headers, json={"addressId": address_id}
+            "/orders", headers=self.headers, json={"address_id": address_id}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("six-digit PIN", response.json()["detail"])
@@ -212,7 +212,7 @@ class OrderApiTest(unittest.TestCase):
         self.add_cart_item()
 
         response = self.client.post(
-            "/orders", headers=self.headers, json={"addressId": address_id}
+            "/orders", headers=self.headers, json={"address_id": address_id}
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -226,7 +226,7 @@ class OrderApiTest(unittest.TestCase):
         self.add_cart_item()
 
         response = self.client.post(
-            "/orders", headers=self.headers, json={"addressId": address_id}
+            "/orders", headers=self.headers, json={"address_id": address_id}
         )
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -238,7 +238,7 @@ class OrderApiTest(unittest.TestCase):
         address_id = self.add_address()
         self.add_cart_item()
         placed = self.client.post(
-            "/orders", headers=self.headers, json={"addressId": address_id}
+            "/orders", headers=self.headers, json={"address_id": address_id}
         )
         self.assertEqual(placed.status_code, status.HTTP_201_CREATED, placed.text)
 
@@ -255,7 +255,7 @@ class OrderApiTest(unittest.TestCase):
         self.add_cart_item(variant_id="missing-variant")
         address_id = self.add_address()
         missing_variant = self.client.post(
-            "/orders", headers=self.headers, json={"addressId": address_id}
+            "/orders", headers=self.headers, json={"address_id": address_id}
         )
         self.assertEqual(missing_variant.status_code, status.HTTP_409_CONFLICT)
 
@@ -264,7 +264,7 @@ class OrderApiTest(unittest.TestCase):
             db.commit()
         self.add_cart_item(quantity=6)
         unavailable_quantity = self.client.post(
-            "/orders", headers=self.headers, json={"addressId": address_id}
+            "/orders", headers=self.headers, json={"address_id": address_id}
         )
         self.assertEqual(unavailable_quantity.status_code, status.HTTP_409_CONFLICT)
 

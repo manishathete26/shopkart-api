@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class OrderCreate(BaseModel):
-    address_id: int = Field(gt=0, alias="addressId")
+    address_id: int = Field(gt=0)
 
 
 class OrderItemRead(BaseModel):
