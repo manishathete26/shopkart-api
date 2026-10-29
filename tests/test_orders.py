@@ -8,14 +8,15 @@ os.environ.setdefault("SECRET_KEY", "shopkart-test-secret-key-at-least-32-bytes-
 
 from fastapi import status
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, inspect, select, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.security import create_access_token
 from app.db.base import Base
-from app.db.session import get_db
+from app.db.session import ensure_order_address_reference, get_db
 from app.main import app
+from app.models.address import Address
 from app.models.auth import User
 from app.models.cart import CartItem
 from app.models.order import Order, OrderItem
@@ -107,6 +108,24 @@ class OrderApiTest(unittest.TestCase):
             )
             db.commit()
 
+    def add_address(
+        self,
+        user_id: int | None = None,
+        *,
+        address: str = "123 Market Street",
+        pin: str | None = "123456",
+    ) -> int:
+        with self.SessionLocal() as db:
+            saved_address = Address(
+                user_id=user_id or self.user_id,
+                address=address,
+                pin=pin,
+                label="Home",
+            )
+            db.add(saved_address)
+            db.commit()
+            return saved_address.id
+
     def add_order(self, user_id: int, created_at: datetime, order_number: int = 1):
         with self.SessionLocal() as db:
             order = Order(
@@ -115,6 +134,7 @@ class OrderApiTest(unittest.TestCase):
                 total_amount=Decimal("12.50"),
                 shipping_address="123 Market Street",
                 shipping_pin="123456",
+                shipping_address_id=None,
                 created_at=created_at,
                 items=[
                     OrderItem(
@@ -144,14 +164,19 @@ class OrderApiTest(unittest.TestCase):
 
     def test_place_order_snapshots_items_decrements_stock_and_clears_cart(self):
         self.add_cart_item(quantity=2)
+        address_id = self.add_address()
 
-        response = self.client.post("/orders", headers=self.headers)
+        response = self.client.post(
+            "/orders", headers=self.headers, json={"address_id": address_id}
+        )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.text)
         data = response.json()
         self.assertEqual(data["status"], "placed")
         self.assertEqual(data["total_amount"], "25.00")
         self.assertEqual(data["shipping_address"], "123 Market Street")
+        self.assertEqual(data["shipping_pin"], "123456")
+        self.assertEqual(data["shipping_address_id"], address_id)
         self.assertEqual(len(data["items"]), 1)
         self.assertEqual(data["items"][0]["product_name"], "Test Product")
         self.assertEqual(data["items"][0]["variant"]["color"], "red")
@@ -164,35 +189,83 @@ class OrderApiTest(unittest.TestCase):
             self.assertEqual(product.variants[0]["stock"], 3)
             order = db.get(Order, data["id"])
             self.assertEqual(order.user_id, self.user_id)
+            self.assertEqual(order.shipping_address_id, address_id)
 
-    def test_checkout_rejects_empty_cart_and_incomplete_delivery_details(self):
-        empty_cart = self.client.post("/orders", headers=self.headers)
+    def test_checkout_rejects_empty_cart_and_missing_delivery_address(self):
+        address_id = self.add_address()
+        empty_cart = self.client.post(
+            "/orders", headers=self.headers, json={"address_id": address_id}
+        )
         self.assertEqual(empty_cart.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(empty_cart.json()["detail"], "Cannot place an order with an empty cart")
 
-        user_id = self.create_user(
-            "incomplete@example.com",
-            address=None,
-            pin=None,
-        )
-        token = create_access_token(user_id)
+        address_id = self.add_address(pin=None)
+        self.add_cart_item()
         response = self.client.post(
-            "/orders",
-            headers={"Authorization": f"Bearer {token}"},
+            "/orders", headers=self.headers, json={"address_id": address_id}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("delivery address", response.json()["detail"])
+        self.assertIn("six-digit PIN", response.json()["detail"])
+
+    def test_checkout_rejects_invalid_delivery_pin_without_mutating_cart(self):
+        address_id = self.add_address(pin="ABCDEF")
+        self.add_cart_item()
+
+        response = self.client.post(
+            "/orders", headers=self.headers, json={"address_id": address_id}
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        with self.SessionLocal() as db:
+            self.assertEqual(db.scalar(select(Order.id)), None)
+            self.assertIsNotNone(db.scalar(select(CartItem.id)))
+
+    def test_checkout_rejects_address_not_owned_by_current_user(self):
+        other_user_id = self.create_user("other-address-owner@example.com")
+        address_id = self.add_address(other_user_id)
+        self.add_cart_item()
+
+        response = self.client.post(
+            "/orders", headers=self.headers, json={"address_id": address_id}
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        with self.SessionLocal() as db:
+            self.assertEqual(db.scalar(select(Order.id)), None)
+            self.assertIsNotNone(db.scalar(select(CartItem.id)))
+
+    def test_deleting_address_preserves_order_snapshot_and_clears_reference(self):
+        address_id = self.add_address()
+        self.add_cart_item()
+        placed = self.client.post(
+            "/orders", headers=self.headers, json={"address_id": address_id}
+        )
+        self.assertEqual(placed.status_code, status.HTTP_201_CREATED, placed.text)
+
+        deleted = self.client.delete(f"/addresses/{address_id}", headers=self.headers)
+        self.assertEqual(deleted.status_code, status.HTTP_204_NO_CONTENT)
+
+        history = self.client.get("/orders", headers=self.headers)
+        order = history.json()["orders"][0]
+        self.assertIsNone(order["shipping_address_id"])
+        self.assertEqual(order["shipping_address"], "123 Market Street")
+        self.assertEqual(order["shipping_pin"], "123456")
 
     def test_checkout_rejects_unavailable_variant_and_quantity(self):
         self.add_cart_item(variant_id="missing-variant")
-        missing_variant = self.client.post("/orders", headers=self.headers)
+        address_id = self.add_address()
+        missing_variant = self.client.post(
+            "/orders", headers=self.headers, json={"address_id": address_id}
+        )
         self.assertEqual(missing_variant.status_code, status.HTTP_409_CONFLICT)
 
         with self.SessionLocal() as db:
             db.query(CartItem).filter(CartItem.user_id == self.user_id).delete()
             db.commit()
         self.add_cart_item(quantity=6)
-        unavailable_quantity = self.client.post("/orders", headers=self.headers)
+        unavailable_quantity = self.client.post(
+            "/orders", headers=self.headers, json={"address_id": address_id}
+        )
         self.assertEqual(unavailable_quantity.status_code, status.HTTP_409_CONFLICT)
 
     def test_history_is_user_scoped_and_paginated(self):
@@ -213,6 +286,7 @@ class OrderApiTest(unittest.TestCase):
         self.assertEqual(first_data["pageSize"], 1)
         self.assertEqual(first_data["totalPages"], 2)
         self.assertEqual(first_data["orders"][0]["items"][0]["product_name"], "Test Product 2")
+        self.assertIsNone(first_data["orders"][0]["shipping_address_id"])
 
         second_page = self.client.get(
             "/orders?page=2&pageSize=1",
@@ -295,6 +369,46 @@ class OrderApiTest(unittest.TestCase):
         self.assertEqual(invalid_page_size.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
         self.assertEqual(invalid_duration_below_minimum.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
         self.assertEqual(invalid_duration_above_maximum.status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
+
+    def test_order_address_migration_preserves_existing_orders(self):
+        legacy_engine = create_engine("sqlite://")
+        try:
+            with legacy_engine.begin() as connection:
+                connection.execute(text("CREATE TABLE addresses (id INTEGER PRIMARY KEY)"))
+                connection.execute(text("""
+                    CREATE TABLE orders (
+                        id INTEGER PRIMARY KEY,
+                        shipping_address VARCHAR(500),
+                        shipping_pin VARCHAR(12)
+                    )
+                """))
+                connection.execute(text(
+                    "INSERT INTO orders (id, shipping_address, shipping_pin) "
+                    "VALUES (1, '123 Market Street', '123456')"
+                ))
+
+            ensure_order_address_reference(legacy_engine)
+
+            inspector = inspect(legacy_engine)
+            self.assertIn(
+                "shipping_address_id",
+                {column["name"] for column in inspector.get_columns("orders")},
+            )
+            self.assertTrue(any(
+                foreign_key.get("constrained_columns") == ["shipping_address_id"]
+                and foreign_key.get("referred_table") == "addresses"
+                for foreign_key in inspector.get_foreign_keys("orders")
+            ))
+            with legacy_engine.connect() as connection:
+                migrated = connection.execute(text(
+                    "SELECT shipping_address_id, shipping_address, shipping_pin "
+                    "FROM orders WHERE id = 1"
+                )).one()
+                self.assertIsNone(migrated.shipping_address_id)
+                self.assertEqual(migrated.shipping_address, "123 Market Street")
+                self.assertEqual(migrated.shipping_pin, "123456")
+        finally:
+            legacy_engine.dispose()
 
 
 if __name__ == "__main__":

@@ -14,6 +14,9 @@ class Order(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     status: Mapped[str] = mapped_column(String(30), nullable=False, default="placed")
     total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    shipping_address_id: Mapped[int | None] = mapped_column(
+        ForeignKey("addresses.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     shipping_address: Mapped[str | None] = mapped_column(String(500), nullable=True)
     shipping_pin: Mapped[str | None] = mapped_column(String(12), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
