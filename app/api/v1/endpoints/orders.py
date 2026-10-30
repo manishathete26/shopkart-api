@@ -16,7 +16,12 @@ from ....models.address import Address
 from ....models.cart import CartItem
 from ....models.order import Order, OrderItem
 from ....models.product import Product
-from ....schemas.order import OrderCreate, OrderHistoryRead, OrderRead
+from ....schemas.order import (
+    BuyNowOrderCreate,
+    OrderCreate,
+    OrderHistoryRead,
+    OrderRead,
+)
 from ....services.product_catalog import product_variants
 
 router = APIRouter(prefix="/orders", tags=["orders"])
@@ -92,9 +97,57 @@ def place_order(
     db: Session = Depends(get_db),
 ) -> dict:
     """Create an order from the current cart and a selected saved address."""
+    cart_items = db.scalars(
+        select(CartItem)
+        .where(CartItem.user_id == current_user.id)
+        .order_by(CartItem.id)
+    ).all()
+    if not cart_items:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot place an order with an empty cart",
+        )
+
+    requested_items = [
+        (item.product_id, item.variant_id, item.quantity) for item in cart_items
+    ]
+    return _create_order(payload.address_id, requested_items, current_user, db, cart_items)
+
+
+@router.post(
+    "/buy-now",
+    response_model=OrderRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def buy_now(
+    payload: BuyNowOrderCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Create an order directly from selected product variants, without using the cart."""
+    # Combine duplicate product/variant lines before checking stock or calculating totals.
+    quantities: dict[tuple[int, str], int] = {}
+    for item in payload.items:
+        key = (item.parent_id, item.variant_id)
+        quantities[key] = quantities.get(key, 0) + item.quantity
+    requested_items = [
+        (product_id, variant_id, quantity)
+        for (product_id, variant_id), quantity in quantities.items()
+    ]
+    return _create_order(payload.address_id, requested_items, current_user, db)
+
+
+def _create_order(
+    address_id: int,
+    requested_items: list[tuple[int, str, int]],
+    current_user: User,
+    db: Session,
+    cart_items: list[CartItem] | None = None,
+) -> dict:
+    """Validate and persist an order; only cart checkout removes cart rows."""
     saved_address = db.scalar(
         select(Address).where(
-            Address.id == payload.address_id,
+            Address.id == address_id,
             Address.user_id == current_user.id,
         )
     )
@@ -112,18 +165,7 @@ def place_order(
             detail="Selected address must have a delivery address and six-digit PIN",
         )
 
-    cart_items = db.scalars(
-        select(CartItem)
-        .where(CartItem.user_id == current_user.id)
-        .order_by(CartItem.id)
-    ).all()
-    if not cart_items:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot place an order with an empty cart",
-        )
-
-    product_ids = sorted({item.product_id for item in cart_items})
+    product_ids = sorted({product_id for product_id, _, _ in requested_items})
     products = db.scalars(
         select(Product)
         .where(Product.id.in_(product_ids))
@@ -141,15 +183,15 @@ def place_order(
         shipping_pin=pin,
     )
     total = Decimal("0.00")
-    for cart_item in cart_items:
-        product = products_by_id.get(cart_item.product_id)
+    for product_id, variant_id, quantity in requested_items:
+        product = products_by_id.get(product_id)
         if product is None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Product {cart_item.product_id} is no longer available",
+                detail=f"Product {product_id} is no longer available",
             )
-        variant, unit_price, stock = _get_variant(product, cart_item.variant_id)
-        if cart_item.quantity < 1 or cart_item.quantity > stock:
+        variant, unit_price, stock = _get_variant(product, variant_id)
+        if quantity < 1 or quantity > stock:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Requested quantity for {product.name} is no longer available",
@@ -158,20 +200,20 @@ def place_order(
             dict(entry) for entry in product_variants(product.id, product.variants)
         ]
         for index, entry in enumerate(updated_variants):
-            if str(entry.get("variantid", "")) == cart_item.variant_id:
-                entry["stock"] = stock - cart_item.quantity
+            if str(entry.get("variantid", "")) == variant_id:
+                entry["stock"] = stock - quantity
                 break
         product.variants = updated_variants
-        line_total = unit_price * cart_item.quantity
+        line_total = unit_price * quantity
         total += line_total
         order.items.append(
             OrderItem(
                 product_id=product.id,
                 product_name=product.name,
-                variant_id=cart_item.variant_id,
+                variant_id=variant_id,
                 variant_snapshot=dict(variant),
                 unit_price=unit_price,
-                quantity=cart_item.quantity,
+                quantity=quantity,
                 line_total=line_total,
             )
         )
@@ -183,8 +225,9 @@ def place_order(
         )
     order.total_amount = total
     db.add(order)
-    for cart_item in cart_items:
-        db.delete(cart_item)
+    if cart_items is not None:
+        for cart_item in cart_items:
+            db.delete(cart_item)
 
     try:
         db.commit()

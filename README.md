@@ -181,9 +181,25 @@ Routes are mounted directly on the FastAPI application (there is no `/api/v1` UR
 | Cart (**Bearer**) | `GET /cart`; `POST /cart/items`; `PATCH /cart/items/{item_id}`; `DELETE /cart/items/{item_id}` | Cart rows identify a product variant and enforce available stock. |
 | Wishlist (**Bearer**) | `GET /wishlist`; `POST /wishlist`; `DELETE /wishlist/{product_id}` | One entry per product per user, with the selected variant retained as metadata. |
 | Addresses (**Bearer**) | `GET /addresses`; `POST /addresses`; `PATCH /addresses/{address_id}`; `DELETE /addresses/{address_id}` | Saved addresses are scoped to the authenticated user; create accepts a full address or structured street, city, and state fields. |
-| Orders (**Bearer**) | `POST /orders`; `GET /orders` | Placement accepts a saved `address_id`, validates the caller-owned address, cart, selected variants, stock, and total in one transaction. History supports `page`, `pageSize`, and either `duration` (1–36 months) or `year`. |
+| Orders (**Bearer**) | `POST /orders`; `POST /orders/buy-now`; `GET /orders` | Cart checkout orders the current cart. Buy Now accepts selected `parent_id`, `variant_id`, and `quantity` items directly, without adding them to or clearing the cart. Both validate the caller-owned address, variants, stock, and total. History supports `page`, `pageSize`, and either `duration` (1–36 months) or `year`. |
 
 The `products` API response uses the existing catalog JSON shape (`subCategory`, `parentId`, and related camelCase fields). List endpoints use `page` and `pageSize` query parameters where applicable; product/home pages allow up to 100 items per page.
+
+### Buy Now checkout
+
+`POST /orders/buy-now` creates an order directly from selected product variants without adding those products to the cart. Include a saved `address_id` and an `items` array; each item has `parent_id`, `variant_id`, and `quantity`. The array supports multiple products in one order:
+
+```json
+{
+  "address_id": 42,
+  "items": [
+    {"parent_id": 12, "variant_id": "pink-128gb", "quantity": 1},
+    {"parent_id": 18, "variant_id": "blue-standard", "quantity": 2}
+  ]
+}
+```
+
+The API uses current catalog prices, validates variant availability and stock, decrements purchased stock, and snapshots the order and shipping address. It leaves the cart unchanged. Send a Bearer access token as with the other order routes.
 
 ### Product variants and legacy data
 

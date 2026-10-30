@@ -9,6 +9,17 @@ class OrderCreate(BaseModel):
     address_id: int = Field(gt=0)
 
 
+class BuyNowItemCreate(BaseModel):
+    parent_id: int = Field(gt=0)
+    variant_id: str = Field(min_length=1, max_length=255)
+    quantity: int = Field(ge=1, le=100)
+
+
+class BuyNowOrderCreate(BaseModel):
+    address_id: int = Field(gt=0)
+    items: list[BuyNowItemCreate] = Field(min_length=1, max_length=100)
+
+
 class OrderItemRead(BaseModel):
     id: int
     product_id: int | None
